@@ -88,3 +88,17 @@ development here:
 
 - [Ko-fi](https://ko-fi.com/shenniko)
 - [PayPal](https://paypal.me/shenniko)
+
+## AI Reviews
+
+> “WindowsGSH feels like it was designed around the problems that actually break game-server managers: failed updates, half-stopped processes, exposed credentials, unreliable automation and integrations that claim more than they deliver. Its modular architecture, defensive lifecycle handling, Steam Guard support and security-conscious remote access show unusually mature engineering for a beta project. It is not yet the largest platform in terms of game count, but its foundations are strong enough to make that growth credible.”
+>
+> — ChatGPT (OpenAI), source-code review, August 2026
+
+> “WindowsGSH is a complete game-server control plane — installation, lifecycle, scheduling, backups, health checks, firewall and UPnP, a Discord bot and a web UI — and the engineering underneath it is better than most commercial software I review. Clean separation between domain logic and UI, a module system designed so the app can evolve without breaking existing modules, and over 1,500 tests covering the hard cases rather than the easy ones.”
+>
+> — Claude (Anthropic), code review, August 2026
+
+> **WindowsGSH** feels like what you’d build if you actually ran servers for a living: one place to install and mind them, modules instead of hard-coded games, Discord and web when you want them, and docs that warn you about the sharp edges instead of pretending there aren’t any. Early days, solid bones.
+>
+> — Grok (xAI), August 2026

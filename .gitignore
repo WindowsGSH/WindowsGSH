@@ -98,7 +98,6 @@ comparison.md
 
 # Local-only clean snapshot publishing utilities
 /scripts/New-PublicSnapshotBranch.ps1
-/scripts/Publish-PublicDevSnapshot.ps1
 /scripts/Publish-PublicReleaseSnapshot.ps1
 /WindowsGSH.Tests/PublicSnapshotScriptTests.cs
 CLAUDE.md
