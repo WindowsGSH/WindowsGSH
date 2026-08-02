@@ -1,0 +1,217 @@
+{
+  "_comment": "WindowsGSH Steam module manifest template. Keep this file named module.json. Unknown fields like _comment are ignored by WindowsGSH.",
+  "id": "blank-steam-template",
+  "_comment_id": "Required. Lowercase unique module id. Used for folder names and server moduleId. Example: my-survival-game.",
+  "name": "Blank Steam Template Server",
+  "_comment_name": "Required. Friendly name shown in the UI.",
+  "version": "0.1.0",
+  "_comment_version": "Recommended. Your module version.",
+  "author": "Your Name",
+  "_comment_author": "Shown in Module Management. Replace with your name or organisation.",
+  "description": "Template WindowsGSH module for a SteamCMD dedicated server.",
+  "_comment_description": "Shown in Module Management. Keep this short and useful.",
+  "url": "https://example.com/my-module",
+  "_comment_url": "Primary link shown in Module Management.",
+  "homepage": "https://example.com/my-game",
+  "repository": "https://example.com/my-module-repo",
+  "sourceUrl": "https://example.com/my-module-download",
+  "color": "#1E8449",
+  "_comment_color": "Hex accent colour used behind author.png in Module Management.",
+  "type": "csharp",
+  "_comment_type": "Use csharp when shipping a .cs file. Use json for manifest-only modules with no custom C# code.",
+  "entry": "WindowsGSH.Modules.BlankSteamTemplate.BlankSteamTemplateModule",
+  "_comment_entry": "Required for C# modules. Fully-qualified public class name implementing IGameServerModule.",
+  "steam": {
+    "_comment": "Optional. Remove this whole object for non-Steam servers.",
+    "appId": "000000",
+    "_comment_appId": "Replace with the real Steam dedicated server App ID, for example 258550 for Rust.",
+    "anonymous": true,
+    "_comment_anonymous": "true for servers that allow anonymous SteamCMD login. false if a Steam account is required to download.",
+    "validate": true,
+    "customArguments": "",
+    "_comment_customArguments": "Optional privileged SteamCMD option tokens using Windows command-line quoting. SteamCMD +commands are rejected; use dedicated manifest fields instead."
+  },
+  "entryPoints": {
+    "_comment": "Required. start is the server executable path relative to the server install folder.",
+    "start": "server.exe",
+    "processName": "server",
+    "_comment_processName": "Name of the running process without extension. WindowsGSH uses this to detect if the server is already running. Defaults to the start filename without extension."
+  },
+  "runtime": {
+    "consoleStrategy": "Redirected",
+    "_comment_consoleStrategy": "How WindowsGSH interacts with the server console. Options: Redirected (stdin/stdout, correct for most Steam servers), WindowMessage (custom window-message implementation in C#), RconPreferred (use RCON for commands instead of stdin), LogTailOnly (show logs but no command input), None (no console surface at all).",
+    "portIncrements": 1,
+    "_comment_portIncrements": "How many ports one server instance occupies. WindowsGSH uses this to suggest the next available port when adding a new server.",
+    "defaultArguments": "-ip {quote:network.ip} -port {network.port} -maxplayers {server.maxPlayers} {server.additionalArguments}",
+    "_comment_defaultArguments": "Launch arguments. {key} placeholders are replaced with values from configFields before the server starts.",
+    "logPath": "",
+    "_comment_logPath": "Optional. Log folder path relative to the server install folder, for example logs. WindowsGSH reads this for log display and crash diagnostics."
+  },
+  "capabilities": {
+    "directConnection": true,
+    "_comment_directConnection": "true if players connect directly to an IP and port rather than through a relay or matchmaking service.",
+    "consoleCommands": false,
+    "_comment_consoleCommands": "Set to true only when consoleStrategy is WindowMessage and the C# module implements IModuleConsoleCommandCapability. Leave false for all other strategies."
+  },
+  "configFields": [
+    {
+      "_comment": "configFields define the settings UI shown in WindowsGSH. Values are stored in ServerConfig.json under the settings key and passed to the C# module.",
+      "key": "server.name",
+      "label": "Server Name",
+      "type": "Text",
+      "defaultValue": "My Template Server",
+      "required": true,
+      "description": "Name shown in WindowsGSH and, if your module writes config files, in the game server."
+    },
+    {
+      "key": "network.ip",
+      "label": "Server IP",
+      "type": "Text",
+      "defaultValue": "0.0.0.0",
+      "description": "Use 0.0.0.0 to bind to all interfaces."
+    },
+    {
+      "key": "network.port",
+      "label": "Server Port",
+      "type": "Port",
+      "defaultValue": 27015,
+      "required": true,
+      "minimum": 1,
+      "maximum": 65535
+    },
+    {
+      "key": "network.queryPort",
+      "label": "Query Port",
+      "type": "Port",
+      "_comment_defaultValue": "Deliberately no defaultValue here, not a number matching network.port - see the ports[] query entry below for why: a shared default would make this indistinguishable from 'not really a separate port,' and a distinct default would make WindowsGSH open an extra firewall hole for a port nothing is listening on by default. Leave this blank unless your game genuinely answers queries on a different port.",
+      "minimum": 1,
+      "maximum": 65535,
+      "description": "Optional. Only set this if your server answers queries on a different port from the game port."
+    },
+    {
+      "key": "server.maxPlayers",
+      "label": "Max Players",
+      "type": "Number",
+      "defaultValue": 16,
+      "minimum": 1,
+      "maximum": 128
+    },
+    {
+      "key": "server.password",
+      "label": "Server Password",
+      "type": "Password",
+      "defaultValue": ""
+    },
+    {
+      "key": "rcon.password",
+      "label": "RCON Password",
+      "type": "Password",
+      "defaultValue": "",
+      "description": "Optional. Only used if your C# module implements ExecuteRconCommandAsync and sets supportsRcon: true."
+    },
+    {
+      "key": "server.public",
+      "label": "Public Server",
+      "type": "Boolean",
+      "defaultValue": true
+    },
+    {
+      "key": "server.mode",
+      "label": "Game Mode",
+      "type": "Select",
+      "defaultValue": "Survival",
+      "options": [ "Survival", "Creative", "Arena" ],
+      "_comment": "Select fields show a dropdown. Options lists the allowed values."
+    },
+    {
+      "key": "server.additionalArguments",
+      "label": "Additional Arguments",
+      "type": "CommandLine",
+      "defaultValue": "",
+      "description": "Optional extra launch arguments appended to the command line."
+    }
+  ],
+  "_comment_advanced_fields": "Advanced configField options: group (string, groups fields visually in the UI), restartRequired (bool, flags that a server restart is needed after the value changes), validationPattern (regex string), validationMessage (shown when the pattern fails), visibleWhen.key + visibleWhen.equals or visibleWhen.isTruthy (hide/show a field based on another field value).",
+  "ports": [
+    {
+      "_comment": "Ports declare the server's network surface for Server Doctor, firewall diagnostics, and manual port-forwarding instructions. Each port must set exactly one of configField, fixedValue, or offsetFrom.",
+      "id": "game",
+      "name": "Game Port",
+      "protocol": "udp",
+      "configField": "network.port",
+      "_comment_configField": "Reads the effective port from a configField's value at runtime. Must reference a real configFields key.",
+      "required": true,
+      "openExternally": true
+    },
+    {
+      "id": "query",
+      "name": "Query Port",
+      "protocol": "udp",
+      "configField": "network.queryPort",
+      "openExternally": true,
+      "_comment_query": "Not required, and network.queryPort has no default above - a fresh server leaves this port Unresolved (not Invalid, not overlapping the game port) until someone fills in a real value. Only remove this entry if your game can never answer queries on a distinct port at all; leave it declared-but-empty otherwise, since Server Doctor/firewall diagnostics can only ever know about a port that's actually declared here, however it currently resolves."
+    },
+    {
+      "id": "rcon",
+      "name": "RCON",
+      "protocol": "tcp",
+      "fixedValue": 27016,
+      "_comment_fixedValue": "A literal port number, for a port with no corresponding configField.",
+      "openExternally": false,
+      "_comment_openExternally": "false marks a port as local-only - it will not be recommended for firewall/UPnP forwarding or manual port-forwarding instructions. Remove this whole rcon entry if your module has no RCON port."
+    }
+  ],
+  "_comment_ports_offset": "A port can also be declared relative to another: { \"id\": \"web\", \"name\": \"Web Admin\", \"protocol\": \"tcp\", \"offsetFrom\": \"game\", \"offset\": 1 } resolves to the game port's value plus 1. rangeSize (default 1) reserves that many consecutive ports starting at the resolved value, for servers that occupy a block of ports.",
+  "backupTargets": [
+    {
+      "_comment": "Backup targets appear on the Backups tab. Paths are relative to the server install folder.",
+      "key": "config",
+      "label": "Config",
+      "path": "config",
+      "type": "directory",
+      "required": true
+    },
+    {
+      "key": "saves",
+      "label": "Saves",
+      "path": "saves",
+      "type": "directory"
+    }
+  ],
+  "addons": [
+    {
+      "_comment": "Optional. Remove addons if the server has no addon or mod support. Each entry appears in the Addons tab.",
+      "id": "example-addon",
+      "name": "Example Addon",
+      "description": "Shows how addon metadata appears in WindowsGSH.",
+      "downloadUrl": "https://example.com/addon",
+      "installInstructions": "Download the addon and place it in the server addons folder.",
+      "sourceName": "Example Addon Project",
+      "sourceVersion": "latest",
+      "capabilitiesAdded": {
+        "query": false,
+        "rcon": false
+      },
+      "package": {
+        "_comment": "Optional automation. Remove this block to keep a manual download-page addon. Supported kinds: Zip, Tar, TarGz, File.",
+        "kind": "Zip",
+        "sourceUrl": "https://example.com/addon.zip",
+        "installPath": "addons",
+        "stripComponents": 1,
+        "requiredMarkers": [
+          "example-addon"
+        ],
+        "expectedSha256": "",
+        "_comment_expectedSha256": "Strongly recommended. SHA-256 of the downloaded archive/file (uppercase or lowercase, case-insensitive), verified before extraction. Leave blank only if you can't pin a hash yet - WindowsGSH will flag it as a module diagnostics warning and install without verifying the download."
+      },
+      "configFields": [
+        {
+          "key": "example.enabled",
+          "label": "Enable Example Addon",
+          "type": "Boolean",
+          "defaultValue": false
+        }
+      ]
+    }
+  ]
+}

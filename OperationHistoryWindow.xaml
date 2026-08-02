@@ -1,0 +1,80 @@
+<ui:FluentWindow x:Class="WindowsGSH.OperationHistoryWindow"
+                 xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                 xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+                 Title="Operation History"
+                 Width="980"
+                 Height="620"
+                 MinWidth="860"
+                 MinHeight="540"
+                 WindowStartupLocation="CenterOwner"
+                 ExtendsContentIntoTitleBar="True"
+                 Icon="WindowsGSH.ico"
+                 Background="{DynamicResource WorkspaceBrush}">
+    <ui:FluentWindow.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <!-- See ExitDecisionWindow.xaml for why this is merged locally, not in App.xaml. -->
+                <ui:ControlsDictionary />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </ui:FluentWindow.Resources>
+    <Grid Background="{DynamicResource WorkspaceBrush}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <ui:TitleBar Grid.Row="0"
+                     Title="Operation History"
+                     Background="{DynamicResource WindowChromeBrush}"
+                     Foreground="{DynamicResource TopBarTextBrush}"
+                     ButtonsForeground="{DynamicResource TopBarTextBrush}">
+            <ui:TitleBar.Icon>
+                <ui:ImageIcon Source="WindowsGSH.ico" />
+            </ui:TitleBar.Icon>
+        </ui:TitleBar>
+
+        <Grid Grid.Row="1" Margin="22" Background="{DynamicResource WorkspaceBrush}" TextElement.Foreground="{DynamicResource TextBrush}">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <StackPanel>
+                <TextBlock Text="Operation History" FontSize="24" FontWeight="Bold" Foreground="{DynamicResource TextBrush}" />
+                <TextBlock Text="Active and recent server operations." Margin="0,4,0,0" Foreground="{DynamicResource MutedTextBrush}" />
+            </StackPanel>
+
+            <DataGrid x:Name="OperationsGrid"
+                      Grid.Row="1"
+                      Margin="0,18,0,0"
+                      AutoGenerateColumns="False"
+                      IsReadOnly="True"
+                      HeadersVisibility="Column"
+                      GridLinesVisibility="Horizontal"
+                      Background="{DynamicResource PanelBrush}"
+                      Foreground="{DynamicResource TextBrush}"
+                      BorderBrush="{DynamicResource BorderBrushSoft}"
+                      CanUserAddRows="False">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Server" Binding="{Binding ServerName}" Width="*" />
+                    <DataGridTextColumn Header="Kind" Binding="{Binding Kind}" Width="110" />
+                    <DataGridTextColumn Header="Status" Binding="{Binding Status}" Width="150" />
+                    <DataGridTextColumn Header="Elapsed" Binding="{Binding ElapsedText}" Width="90" />
+                    <DataGridTextColumn Header="Error" Binding="{Binding LastError}" Width="*" />
+                </DataGrid.Columns>
+            </DataGrid>
+
+            <Grid Grid.Row="2" Margin="0,16,0,0">
+                <TextBlock x:Name="StatusTextBlock" VerticalAlignment="Center" Foreground="{DynamicResource MutedTextBrush}" />
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                    <Button Content="Cancel Selected" Width="130" Margin="0,0,8,0" Style="{StaticResource DialogSecondaryButton}" Click="CancelSelectedButton_Click" />
+                    <Button Content="Refresh" Width="92" Margin="0,0,8,0" Style="{StaticResource DialogSecondaryButton}" Click="RefreshButton_Click" />
+                    <Button Content="Close" Width="92" Style="{StaticResource DialogPrimaryButton}" Click="CloseButton_Click" />
+                </StackPanel>
+            </Grid>
+        </Grid>
+    </Grid>
+</ui:FluentWindow>

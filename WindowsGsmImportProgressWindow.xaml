@@ -1,0 +1,78 @@
+<ui:FluentWindow x:Class="WindowsGSH.WindowsGsmImportProgressWindow"
+                 xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                 xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+                 Title="Copying WindowsGSM Server"
+                 Width="520"
+                 Height="220"
+                 ResizeMode="NoResize"
+                 WindowStartupLocation="CenterOwner"
+                 ExtendsContentIntoTitleBar="True"
+                 Icon="WindowsGSH.ico"
+                 Background="{DynamicResource WorkspaceBrush}"
+                 Closing="Window_Closing">
+    <ui:FluentWindow.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <!-- See ExitDecisionWindow.xaml for why this is merged locally, not in App.xaml. -->
+                <ui:ControlsDictionary />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </ui:FluentWindow.Resources>
+    <Grid Background="{DynamicResource WorkspaceBrush}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <ui:TitleBar Grid.Row="0"
+                     Title="Copying WindowsGSM Server"
+                     ShowMinimize="False"
+                     ShowMaximize="False"
+                     CanMaximize="False"
+                     Background="{DynamicResource WindowChromeBrush}"
+                     Foreground="{DynamicResource TopBarTextBrush}"
+                     ButtonsForeground="{DynamicResource TopBarTextBrush}">
+            <ui:TitleBar.Icon>
+                <ui:ImageIcon Source="WindowsGSH.ico" />
+            </ui:TitleBar.Icon>
+        </ui:TitleBar>
+
+        <Grid Grid.Row="1"
+              Margin="22"
+              Background="{DynamicResource WorkspaceBrush}"
+              TextElement.Foreground="{DynamicResource TextBrush}">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <TextBlock x:Name="PhaseTextBlock"
+                       Text="Preparing copy..."
+                       FontSize="18"
+                       FontWeight="SemiBold"
+                       TextWrapping="Wrap" />
+
+            <ProgressBar x:Name="CopyProgressBar"
+                         Grid.Row="1"
+                         Height="18"
+                         Margin="0,18,0,0"
+                         Minimum="0"
+                         Maximum="100" />
+
+            <TextBlock x:Name="DetailTextBlock"
+                       Grid.Row="2"
+                       Margin="0,12,0,0"
+                       Foreground="{DynamicResource MutedTextBrush}"
+                       TextWrapping="Wrap" />
+
+            <TextBlock x:Name="CurrentFileTextBlock"
+                       Grid.Row="3"
+                       Margin="0,8,0,0"
+                       Foreground="{DynamicResource MutedTextBrush}"
+                       TextTrimming="CharacterEllipsis" />
+        </Grid>
+    </Grid>
+</ui:FluentWindow>

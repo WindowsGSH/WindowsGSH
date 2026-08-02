@@ -1,0 +1,42 @@
+name: Game module request
+description: Request support for a new dedicated server/game module.
+title: "[Module]: "
+labels: ["game module"]
+body:
+  - type: input
+    id: game_name
+    attributes:
+      label: Game name
+      placeholder: "Example: Icarus"
+    validations:
+      required: true
+  - type: input
+    id: store_or_server
+    attributes:
+      label: Store/server distribution
+      description: Steam, Epic, direct download, SteamCMD app id, or other source.
+      placeholder: "Example: SteamCMD app id 2089300"
+    validations:
+      required: true
+  - type: textarea
+    id: install_docs
+    attributes:
+      label: Official dedicated server docs
+      description: Link official docs or community docs that explain installation and launch arguments.
+    validations:
+      required: true
+  - type: textarea
+    id: config_details
+    attributes:
+      label: Config and ports
+      description: List known config files, required ports, query ports, RCON details, and launch arguments.
+  - type: dropdown
+    id: tested_manually
+    attributes:
+      label: Have you run this server manually on Windows?
+      options:
+        - "Yes"
+        - "No"
+        - "Not sure"
+    validations:
+      required: true

@@ -1,0 +1,175 @@
+<Application x:Class="WindowsGSH.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml">
+    <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <!--
+                    The three MahApps.Metro;component/Styles/Controls.xaml/Fonts.xaml/Light.Teal.xaml
+                    dictionaries that used to be merged here are gone (Tier 4, MahApps.Metro package
+                    removal, following Sub-chunk 19's theme-engine swap) - confirmed via grep that
+                    nothing in this app resolved any MahApps.Brushes.*/MahApps-prefixed key via
+                    DynamicResource anymore once ServerConfigEditorWindow (Sub-chunk 18, the last
+                    MetroWindow) migrated away. The implicit {x:Type mah:MetroWindow} style that used
+                    to live below AppCheckBox's declaration is gone for the same reason - no window
+                    is a MetroWindow anymore, and it would have failed to resolve its own BasedOn
+                    once these dictionaries were removed anyway.
+
+                    No static <ui:ThemesDictionary> here deliberately - WindowsGSH.Services.
+                    WpfUiThemeSync.Apply(...) (which calls Wpf.Ui.Appearance.ApplicationThemeManager
+                    .Apply(...) internally) is the *only* mechanism that should ever establish this
+                    dictionary, called from two places that share that one method so they can't
+                    diverge: App.xaml.cs's OnStartup, before `new MainWindow()` - the very first,
+                    startup-time application, using the saved theme setting, before any window
+                    exists at all - and MainWindow.Settings.cs's ApplyTheme, for subsequent
+                    user-driven theme-selector changes. A statically-declared <ui:ThemesDictionary>
+                    here, later replaced by a runtime Apply() call, was tried first and found to
+                    leave WPF-UI's own controls broken: confirmed via direct testing that
+                    Wpf.Ui.Controls.SymbolIcon's constructor throws ArgumentException("'' is not a
+                    valid value for property 'FontSize'") in that specific sequence (static XAML
+                    declaration, then a later runtime Apply()) - regardless of the Apply() call's
+                    updateAccent argument - while the identical Apply() call with no prior static
+                    declaration works correctly. Any window using a WPF-UI control whose default
+                    template embeds an icon (DataGrid's WPF-UI-provided template does, via
+                    SymbolIcon internally) would crash the moment it rendered.
+                -->
+            </ResourceDictionary.MergedDictionaries>
+
+            <SolidColorBrush x:Key="TitleBarBrush" Color="#0E2442" />
+            <SolidColorBrush x:Key="WindowChromeBrush" Color="#0E2442" />
+            <SolidColorBrush x:Key="WindowChromeInactiveBrush" Color="#0E2442" />
+            <SolidColorBrush x:Key="TopBarBrush" Color="#0E2442" />
+            <SolidColorBrush x:Key="TopBarIconBrush" Color="#143256" />
+            <SolidColorBrush x:Key="WorkspaceBrush" Color="#101218" />
+            <SolidColorBrush x:Key="SidebarBrush" Color="#151821" />
+            <SolidColorBrush x:Key="PanelBrush" Color="#1B1F2A" />
+            <SolidColorBrush x:Key="PanelAltBrush" Color="#202635" />
+            <SolidColorBrush x:Key="BorderBrushSoft" Color="#2C3444" />
+            <SolidColorBrush x:Key="TextBrush" Color="#F2F5FA" />
+            <SolidColorBrush x:Key="MutedTextBrush" Color="#A3ADBC" />
+            <SolidColorBrush x:Key="NavSelectedBrush" Color="#202B44" />
+            <SolidColorBrush x:Key="NavHoverBrush" Color="#2B3A5E" />
+            <SolidColorBrush x:Key="TopBarTextBrush" Color="#FFFFFF" />
+            <SolidColorBrush x:Key="GoodBrush" Color="#25B957" />
+            <SolidColorBrush x:Key="WarnBrush" Color="#F2AA2E" />
+            <SolidColorBrush x:Key="BadBrush" Color="#EF2D35" />
+            <SolidColorBrush x:Key="PrimaryBrush" Color="#57B8E6" />
+            <SolidColorBrush x:Key="ActionBrush" Color="#33415F" />
+            <SolidColorBrush x:Key="NormalMetricBackground" Color="#242B38" />
+            <SolidColorBrush x:Key="NormalMetricBorder" Color="#344154" />
+            <SolidColorBrush x:Key="NormalMetricText" Color="#F2F5FA" />
+            <SolidColorBrush x:Key="GoodMetricBackground" Color="#173023" />
+            <SolidColorBrush x:Key="GoodMetricBorder" Color="#2F6F48" />
+            <SolidColorBrush x:Key="GoodMetricText" Color="#A9F0C0" />
+            <SolidColorBrush x:Key="BadMetricBackground" Color="#3A2028" />
+            <SolidColorBrush x:Key="BadMetricBorder" Color="#743340" />
+            <SolidColorBrush x:Key="BadMetricText" Color="#FFADB6" />
+            <SolidColorBrush x:Key="WarnMetricBackground" Color="#342A16" />
+            <SolidColorBrush x:Key="WarnMetricBorder" Color="#6E5726" />
+            <SolidColorBrush x:Key="WarnMetricText" Color="#FFD98A" />
+
+            <DropShadowEffect x:Key="CardShadow" Color="#233044" BlurRadius="18" ShadowDepth="4" Opacity="0.13" />
+
+            <Style x:Key="DialogPrimaryButton" TargetType="Button">
+                <Setter Property="Height" Value="34" />
+                <Setter Property="Padding" Value="14,0" />
+                <Setter Property="Background" Value="{DynamicResource PrimaryBrush}" />
+                <Setter Property="Foreground" Value="White" />
+                <Setter Property="BorderThickness" Value="0" />
+                <Setter Property="FontWeight" Value="SemiBold" />
+                <Setter Property="Cursor" Value="Hand" />
+            </Style>
+
+            <Style x:Key="DialogSecondaryButton" TargetType="Button">
+                <Setter Property="Height" Value="34" />
+                <Setter Property="Padding" Value="14,0" />
+                <Setter Property="Background" Value="{DynamicResource PanelAltBrush}" />
+                <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
+                <Setter Property="BorderBrush" Value="{DynamicResource BorderBrushSoft}" />
+                <Setter Property="BorderThickness" Value="1" />
+                <Setter Property="FontWeight" Value="SemiBold" />
+                <Setter Property="Cursor" Value="Hand" />
+            </Style>
+
+            <Style x:Key="DialogTabButton" TargetType="Button" BasedOn="{StaticResource DialogSecondaryButton}">
+                <Setter Property="Background" Value="{DynamicResource PanelBrush}" />
+            </Style>
+
+            <!--
+                Deliberately NOT WPF-UI's implicit CheckBox style (from ui:ControlsDictionary,
+                merged locally in migrated windows - see ExitDecisionWindow.xaml). That style's
+                check glyph is a Wpf.Ui.Controls.SymbolIcon whose ControlTemplate runs a
+                DoubleAnimation on its own Tag property whenever IsChecked flips to true. If the
+                CheckBox is removed from the visual tree while that ~250ms animation is still
+                in-flight - e.g. InstallServerWindow's RefreshConditionalFields() re-rendering
+                FieldsPanel from inside the CheckBox's own Checked/Unchecked handler - WPF's
+                animation storage throws ArgumentNullException("defaultDestinationValue") trying
+                to evaluate the torn-down element's animated value, taking down the whole app
+                (confirmed via real crash logs, 2026-07-17: "Cannot animate the 'Tag' property on
+                a 'Wpf.Ui.Controls.SymbolIcon' using a 'DoubleAnimation'"). This plain, unanimated
+                style sidesteps the defect entirely rather than working around the specific
+                teardown timing - use it on every CheckBox in migrated windows, not just ones with
+                a Checked/Unchecked handler, since any of them could end up removed from the tree
+                mid-animation by a future code change.
+            -->
+            <Style x:Key="AppCheckBox" TargetType="CheckBox">
+                <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
+                <Setter Property="Cursor" Value="Hand" />
+                <!-- Every current usage is a plain boolean field; keep AppCheckBox two-state
+                     explicitly rather than silently allowing IsChecked="{x:Null}" into a
+                     template with no indeterminate visual. -->
+                <Setter Property="IsThreeState" Value="False" />
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="CheckBox">
+                            <StackPanel Orientation="Horizontal">
+                                <Border x:Name="Box"
+                                        Width="18"
+                                        Height="18"
+                                        VerticalAlignment="Center"
+                                        Background="{DynamicResource PanelAltBrush}"
+                                        BorderBrush="{DynamicResource BorderBrushSoft}"
+                                        BorderThickness="1"
+                                        CornerRadius="3">
+                                    <Path x:Name="CheckMark"
+                                          Data="M 2,7 L 6,11 L 14,2"
+                                          Stroke="White"
+                                          StrokeThickness="2"
+                                          StrokeStartLineCap="Round"
+                                          StrokeEndLineCap="Round"
+                                          StrokeLineJoin="Round"
+                                          Visibility="Collapsed" />
+                                </Border>
+                                <ContentPresenter Margin="8,0,0,0" VerticalAlignment="Center" />
+                            </StackPanel>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="Box" Property="BorderBrush" Value="{DynamicResource PrimaryBrush}" />
+                                </Trigger>
+                                <Trigger Property="IsKeyboardFocused" Value="True">
+                                    <Setter TargetName="Box" Property="BorderBrush" Value="{DynamicResource PrimaryBrush}" />
+                                    <Setter TargetName="Box" Property="BorderThickness" Value="2" />
+                                </Trigger>
+                                <Trigger Property="IsChecked" Value="True">
+                                    <Setter TargetName="CheckMark" Property="Visibility" Value="Visible" />
+                                    <Setter TargetName="Box" Property="Background" Value="{DynamicResource PrimaryBrush}" />
+                                    <Setter TargetName="Box" Property="BorderBrush" Value="{DynamicResource PrimaryBrush}" />
+                                </Trigger>
+                                <Trigger Property="IsEnabled" Value="False">
+                                    <Setter Property="Opacity" Value="0.5" />
+                                    <Setter Property="Foreground" Value="{DynamicResource MutedTextBrush}" />
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+            <!-- Keep every ordinary app CheckBox on the same stable, unanimated template.
+                 Migrated windows that merge WPF-UI resources locally repeat this implicit
+                 alias after their merged dictionary so it retains local precedence. -->
+            <Style TargetType="CheckBox" BasedOn="{StaticResource AppCheckBox}" />
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>

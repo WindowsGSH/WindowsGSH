@@ -1,0 +1,65 @@
+name: build
+
+# push is restricted to main (the only long-lived integration branch - "master" was checked and no
+# longer exists locally or on origin) so a normal feature-branch commit only triggers the
+# pull_request run below, not both.
+#
+# Deliberately NOT using paths-ignore here: GitHub's own required-status-check docs warn that a
+# workflow skipped by path filtering leaves a required check "Pending" indefinitely, which can
+# block a documentation-only PR from merging forever - a real risk this repo can't rule out, since
+# its plan tier returns 403 on both the branch-protection and rulesets APIs, so the actual required-
+# check configuration couldn't be confirmed. Revisit only as the more complex "stay triggered, skip
+# the expensive steps, still report success" shape if doc-only build avoidance becomes worth it.
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+# Cancels a superseded in-progress run for the same PR or the same branch when a new commit lands.
+# github.event.pull_request.number keeps different PRs in separate groups; falling back to
+# github.ref keeps push-to-main runs in their own group, isolated from any PR's group.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+# Least-privilege default - this workflow only builds/tests, it never needs to write anything back
+# to the repo (unlike release.yml, which needs contents: write to publish releases).
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: windows-latest
+    # Bounds a stuck test host to a fixed cost instead of consuming Windows minutes indefinitely -
+    # comfortably above the ~7 minute average, per the observed full-suite hangs.
+    timeout-minutes: 20
+
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6
+        with:
+          dotnet-version: '10.0.x'
+
+      # No packages.lock.json exists in this repo (checked before adding this), so the cache key is
+      # derived from the .csproj files themselves (their PackageReference versions) rather than
+      # setup-dotnet's built-in lock-file-based cache option.
+      - name: Cache NuGet packages
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+
+      - name: Restore
+        run: dotnet restore WindowsGSH.sln
+
+      - name: Build
+        run: dotnet build WindowsGSH.sln --configuration Release --no-restore
+
+      - name: Test
+        run: dotnet test WindowsGSH.sln --configuration Release --no-build

@@ -1,0 +1,159 @@
+name: release
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Build and publish release
+    runs-on: windows-latest
+    timeout-minutes: 30
+
+    env:
+      PROJECT_PATH: WindowsGSH.csproj
+      CONFIGURATION: Release
+      RUNTIME: win-x64
+      APP_NAME: WindowsGSH
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6
+        with:
+          dotnet-version: "10.0.x"
+
+      - name: Build, test, and package
+        shell: pwsh
+        run: |
+          .\scripts\Publish-Release.ps1 -Version "${{ github.ref_name }}" -Runtime $env:RUNTIME -Configuration $env:CONFIGURATION
+          $artifactName = "$($env:APP_NAME)-${{ github.ref_name }}-$($env:RUNTIME)"
+          $zipPath = Join-Path $env:GITHUB_WORKSPACE "artifacts\$artifactName.zip"
+          echo "ARTIFACT_NAME=$artifactName" >> $env:GITHUB_ENV
+          echo "ZIP_PATH=$zipPath" >> $env:GITHUB_ENV
+          $shaFile = "$zipPath.sha256"
+          $hash = Get-FileHash $zipPath -Algorithm SHA256
+          echo "SHA256=$($hash.Hash)" >> $env:GITHUB_ENV
+          echo "SHA256_PATH=$shaFile" >> $env:GITHUB_ENV
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: ${{ env.ARTIFACT_NAME }}
+          path: |
+            ${{ env.ZIP_PATH }}
+            ${{ env.SHA256_PATH }}
+
+      - name: Scan release archive with VirusTotal
+        shell: pwsh
+        env:
+          VIRUSTOTAL_API_KEY: ${{ secrets.VIRUSTOTAL_API_KEY }}
+        run: |
+          if ([string]::IsNullOrWhiteSpace($env:VIRUSTOTAL_API_KEY)) {
+            throw "Repository secret VIRUSTOTAL_API_KEY is not configured."
+          }
+
+          $scan = .\scripts\Submit-VirusTotalScan.ps1 `
+            -FilePath $env:ZIP_PATH `
+            -ApiKey $env:VIRUSTOTAL_API_KEY `
+            -PollIntervalSeconds 30 `
+            -TimeoutMinutes 15
+
+          echo "VT_REPORT_URL=$($scan.ReportUrl)" >> $env:GITHUB_ENV
+          echo "VT_MALICIOUS=$($scan.Malicious)" >> $env:GITHUB_ENV
+          echo "VT_SUSPICIOUS=$($scan.Suspicious)" >> $env:GITHUB_ENV
+          echo "VT_HARMLESS=$($scan.Harmless)" >> $env:GITHUB_ENV
+          echo "VT_UNDETECTED=$($scan.Undetected)" >> $env:GITHUB_ENV
+          echo "VT_TOTAL_ENGINES=$($scan.TotalEngines)" >> $env:GITHUB_ENV
+
+      - name: Create release notes
+        shell: pwsh
+        run: |
+          $notesPath = Join-Path $env:GITHUB_WORKSPACE "RELEASE_NOTES.md"
+
+          @"
+          ## WindowsGSH ${{ github.ref_name }}
+
+          ### WARNING: Unsigned beta build
+
+          This artifact is **not code-signed**. Windows SmartScreen may warn or block it on first run
+          ("Windows protected your PC"). This is expected for this project's current unsigned-beta
+          release process, not a sign of tampering by itself. Please verify the SHA256 hash below
+          (and ideally the VirusTotal scan) before running it, and only click "Run anyway" once you
+          have verified it.
+
+          ### Download
+
+          - ``$env:ARTIFACT_NAME.zip``
+
+          ### Security / Verification
+
+          This release was built from tag ``${{ github.ref_name }}`` at commit ``${{ github.sha }}``
+          using GitHub Actions.
+
+          #### SHA256
+
+          ````text
+          $env:SHA256  $env:ARTIFACT_NAME.zip
+          ````
+
+          Verify in PowerShell:
+
+          ````powershell
+          Get-FileHash .\$env:ARTIFACT_NAME.zip -Algorithm SHA256
+          ````
+
+          #### VirusTotal
+
+          - Report: [$env:VT_REPORT_URL]($env:VT_REPORT_URL)
+          - Malicious detections: **$env:VT_MALICIOUS**
+          - Suspicious detections: **$env:VT_SUSPICIOUS**
+          - Harmless: $env:VT_HARMLESS
+          - Undetected: $env:VT_UNDETECTED
+          - Engines reporting: $env:VT_TOTAL_ENGINES
+
+          Review individual detections before publishing this draft. Unsigned or newly-built
+          applications can receive false positives, but detections must not be ignored automatically.
+
+          ### Notes
+
+          - Built on ``windows-latest``.
+          - Published as a self-contained ``win-x64`` build.
+          - Dependency scanning is handled through Dependabot where available.
+          - CodeQL/code scanning may be added when repository settings support it.
+          - A clean scan does not guarantee software is risk-free, but it helps users verify the release artifact.
+          "@ | Out-File -FilePath $notesPath -Encoding utf8
+
+          echo "RELEASE_NOTES_PATH=$notesPath" >> $env:GITHUB_ENV
+
+      - name: Create GitHub Release
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+          IS_PRERELEASE: ${{ contains(github.ref_name, '-') }}
+        run: |
+          $arguments = @(
+            "release", "create", "${{ github.ref_name }}",
+            $env:ZIP_PATH,
+            $env:SHA256_PATH,
+            "--repo", "${{ github.repository }}",
+            "--title", "WindowsGSH ${{ github.ref_name }}",
+            "--notes-file", $env:RELEASE_NOTES_PATH,
+            "--draft",
+            "--verify-tag"
+          )
+
+          if ($env:IS_PRERELEASE -eq "true") {
+            $arguments += "--prerelease"
+          }
+
+          gh @arguments
+          if ($LASTEXITCODE -ne 0) {
+            throw "GitHub release creation failed with exit code $LASTEXITCODE."
+          }

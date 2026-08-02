@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard – WindowsGSH</title>
+  <link rel="stylesheet" href="/css/app.css">
+</head>
+<body>
+  <nav class="nav" id="nav"></nav>
+
+  <main class="page">
+    <div class="page-header">
+      <h2 class="page-title">Servers</h2>
+      <span class="nav-spacer"></span>
+      <span id="lastUpdated" class="timestamp-muted"></span>
+      <button class="btn btn-ghost" id="refreshBtn">Refresh</button>
+    </div>
+
+    <div class="server-grid" id="serverGrid">
+      <p class="empty-state"><span class="spinner"></span> Loading…</p>
+    </div>
+  </main>
+
+  <script type="module" src="/js/dashboard.js"></script>
+</body>
+</html>

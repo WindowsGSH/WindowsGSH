@@ -1,0 +1,39 @@
+name: Feature request
+description: Suggest an improvement or new capability.
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem or workflow
+      description: What are you trying to do, and what makes it difficult today?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: Describe the behavior or UI you would like.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Mention any workaround you are using now.
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Server install/update
+        - Server configuration
+        - WindowsGSM import
+        - Discord integration
+        - Backups
+        - UI/UX
+        - Game modules
+        - Other
+    validations:
+      required: true

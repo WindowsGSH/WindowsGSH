@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Users – WindowsGSH Admin</title>
+  <link rel="stylesheet" href="/css/app.css">
+</head>
+<body>
+  <nav class="nav" id="nav"></nav>
+
+  <main class="page">
+    <div class="page-header">
+      <h2 class="page-title">User Management</h2>
+      <span class="nav-spacer"></span>
+      <a href="/admin/settings" class="btn btn-ghost">Settings</a>
+      <button class="btn btn-secondary" id="newUserBtn">New user</button>
+    </div>
+
+    <div id="errorBanner" class="admin-banner hidden"></div>
+
+    <section id="newUserForm" class="admin-panel hidden">
+      <h3>Create new user</h3>
+      <div class="admin-form-grid">
+        <input id="newUsername" class="input" type="text" placeholder="Username" autocomplete="off">
+        <input id="newPassword" class="input" type="password" placeholder="Password (min 12 chars)" autocomplete="new-password">
+        <select id="newRole" class="input">
+          <option value="Viewer">Viewer</option>
+          <option value="Operator">Operator</option>
+          <option value="Admin">Admin</option>
+        </select>
+        <div class="admin-form-actions">
+          <button class="btn btn-secondary" id="createBtn">Create</button>
+          <button class="btn btn-ghost" id="cancelNewBtn">Cancel</button>
+        </div>
+        <div id="formError" class="admin-error hidden"></div>
+      </div>
+    </section>
+
+    <div id="userList">
+      <p class="empty-state"><span class="spinner"></span> Loading…</p>
+    </div>
+  </main>
+
+  <div id="tokenModal" class="modal-overlay hidden">
+    <div class="modal-box">
+      <h3>Password reset token</h3>
+      <p class="modal-hint">Give this one-time token to the user. It expires in 1 hour and cannot be shown again.</p>
+      <code id="tokenValue" class="token-code"></code>
+      <div class="modal-actions">
+        <button class="btn btn-secondary" id="copyTokenBtn">Copy</button>
+        <button class="btn btn-ghost" id="closeTokenBtn">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="/js/admin_users.js"></script>
+</body>
+</html>

@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Console – WindowsGSH</title>
+  <link rel="stylesheet" href="/css/app.css">
+</head>
+<body>
+  <nav class="nav" id="nav">
+    <span class="nav-brand">Windows<span>GSH</span></span>
+    <a href="/dashboard" class="nav-link-muted">← Dashboard</a>
+    <span id="serverTitle" class="nav-link-muted"></span>
+    <span class="nav-spacer"></span>
+    <span id="wsStatus" class="timestamp-muted"></span>
+  </nav>
+
+  <div class="page page-compact">
+    <!-- Toolbar -->
+    <div class="console-toolbar">
+      <input class="console-filter" id="filterInput" type="search" placeholder="Filter output…" aria-label="Filter console output">
+      <span class="console-toolbar-spacer"></span>
+      <button class="btn btn-ghost" id="pauseBtn">⏸ Pause</button>
+      <button class="btn btn-ghost" id="clearBtn">Clear view</button>
+      <button class="btn btn-ghost" id="copyBtn">Copy</button>
+    </div>
+
+    <!-- Output -->
+    <div class="console-output large" id="consoleOutput" role="log" aria-live="polite" aria-label="Server console output"></div>
+
+    <!-- Input row (hidden for Viewer role) -->
+    <div class="console-input-row hidden" id="inputRow">
+      <input class="console-input" id="consoleInput" type="text" placeholder="Enter server command…" autocomplete="off" aria-label="Console command input">
+      <button class="btn btn-primary" id="sendBtn">Send</button>
+    </div>
+  </div>
+
+  <script type="module" src="/js/console.js"></script>
+</body>
+</html>

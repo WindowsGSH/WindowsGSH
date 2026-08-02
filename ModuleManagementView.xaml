@@ -1,0 +1,243 @@
+<UserControl x:Class="WindowsGSH.ModuleManagementView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:WindowsGSH"
+             Background="{DynamicResource WorkspaceBrush}">
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <!-- MainWindow's local ui:ControlsDictionary merge (Tier 4 Sub-chunk 17) cascades into
+                 this embedded UserControl's unstyled TextBox/Buttons too. Unlike AppSettingsView's
+                 CheckBox, neither control type here has a documented defect under WPF-UI's implicit
+                 styling (ModuleSearchTextBox is single-line, not the PassiveScrollViewer-affected
+                 multi-line case; plain Buttons have no known crash class) - see AppSettingsView.xaml
+                 for why a wholesale MahApps re-merge was reverted rather than kept here too. -->
+            <local:ModuleImageSourceConverter x:Key="ModuleImageSourceConverter" />
+            <BooleanToVisibilityConverter x:Key="BoolToVis" />
+        </ResourceDictionary>
+    </UserControl.Resources>
+    <Grid Background="{DynamicResource WorkspaceBrush}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <Grid Margin="32,28,32,20">
+            <StackPanel>
+                <TextBlock Text="Module Management" Foreground="{DynamicResource TextBrush}" FontSize="30" FontWeight="Bold" />
+                <TextBlock Text="Import native WindowsGSH modules and manage installed or disabled modules." Foreground="{DynamicResource MutedTextBrush}" FontSize="14" Margin="0,4,0,0" />
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                <Button x:Name="ValidateModuleFolderButton" Content="Validate Folder" MinHeight="34" Padding="14,0" Style="{StaticResource DialogSecondaryButton}" Click="ValidateModuleFolderButton_Click" />
+                <Button x:Name="ReloadModulesButton" Content="Reload" MinHeight="34" Padding="14,0" Margin="8,0,0,0" Style="{StaticResource DialogSecondaryButton}" Click="ReloadModulesButton_Click" />
+                <Button Content="Import Folder" MinHeight="34" Padding="14,0" Margin="8,0,0,0" Style="{StaticResource DialogSecondaryButton}" Click="ImportModuleFolderButton_Click" />
+                <Button Content="Import ZIP" MinHeight="34" Padding="14,0" Margin="8,0,0,0" Style="{StaticResource DialogPrimaryButton}" Click="ImportModuleZipButton_Click" />
+            </StackPanel>
+        </Grid>
+
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+            <StackPanel Margin="32,0,32,28">
+                <Border Padding="14"
+                        Background="{DynamicResource WarnMetricBackground}"
+                        BorderBrush="{DynamicResource WarnMetricBorder}"
+                        BorderThickness="1"
+                        CornerRadius="8"
+                        Margin="0,0,0,16">
+                    <TextBlock Text="Imported modules are user-provided. WindowsGSH does not create, own, review, sign, or guarantee third-party modules. If you download and run one, responsibility for that module is yours."
+                               Foreground="{DynamicResource WarnMetricText}"
+                                   TextWrapping="Wrap"
+                                   FontWeight="SemiBold" />
+                </Border>
+
+                <Border Background="{DynamicResource PanelBrush}"
+                        BorderBrush="{DynamicResource BorderBrushSoft}"
+                        BorderThickness="1"
+                        CornerRadius="8"
+                        Padding="14"
+                        Margin="0,0,0,16">
+                    <StackPanel>
+                        <TextBlock Text="Find Modules" Foreground="{DynamicResource TextBrush}" FontSize="18" FontWeight="SemiBold" />
+                        <TextBlock Text="Search GitHub repository names. Results must start with WindowsGSH." Foreground="{DynamicResource MutedTextBrush}" FontSize="12" Margin="0,3,0,10" TextWrapping="Wrap" />
+                        <DockPanel LastChildFill="True">
+                            <Button x:Name="ModuleSearchButton" Content="Search" DockPanel.Dock="Right" MinWidth="92" MinHeight="34" Margin="8,0,0,0" Style="{StaticResource DialogPrimaryButton}" Click="ModuleSearchButton_Click" />
+                            <TextBox x:Name="ModuleSearchTextBox" MinHeight="34" VerticalContentAlignment="Center" KeyDown="ModuleSearchTextBox_KeyDown" />
+                        </DockPanel>
+                        <TextBlock x:Name="ModuleSearchStatusTextBlock" Text="Enter a game name, for example TF2." Foreground="{DynamicResource MutedTextBrush}" FontSize="12" Margin="0,8,0,0" TextWrapping="Wrap" />
+                        <ItemsControl x:Name="ModuleSearchResultsItemsControl" Margin="0,10,0,0">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Background="{DynamicResource WorkspaceBrush}" BorderBrush="{DynamicResource BorderBrushSoft}" BorderThickness="1" CornerRadius="8" Padding="12" Margin="0,0,0,8">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto" />
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+                                            <Border Width="42"
+                                                    Height="42"
+                                                    Background="{DynamicResource PanelBrush}"
+                                                    BorderBrush="{DynamicResource BorderBrushSoft}"
+                                                    BorderThickness="1"
+                                                    CornerRadius="6"
+                                                    Margin="0,0,12,0"
+                                                    VerticalAlignment="Top">
+                                                <Image Source="{Binding AuthorImagePath, Converter={StaticResource ModuleImageSourceConverter}}" Stretch="UniformToFill" />
+                                            </Border>
+                                            <StackPanel Grid.Column="1">
+                                                <StackPanel Orientation="Horizontal">
+                                                    <TextBlock Text="{Binding DisplayName}" Foreground="{DynamicResource TextBrush}" FontWeight="SemiBold" FontSize="14" />
+                                                    <TextBlock Text="{Binding StatsText}" Foreground="{DynamicResource MutedTextBrush}" FontSize="12" Margin="10,1,0,0" />
+                                                </StackPanel>
+                                                <TextBlock Text="{Binding DisplayDescription}" Foreground="{DynamicResource TextBrush}" FontSize="12" Margin="0,4,0,0" TextWrapping="Wrap" />
+                                                <TextBlock Text="{Binding DisplayDetails}" Foreground="{DynamicResource MutedTextBrush}" FontSize="12" Margin="0,3,0,0" TextWrapping="Wrap" />
+                                                <TextBlock Text="{Binding DisplayMetadata}" Foreground="{DynamicResource MutedTextBrush}" FontSize="12" Margin="0,3,0,0" TextWrapping="Wrap" />
+                                                <TextBlock FontSize="12" Margin="0,3,0,0" TextWrapping="Wrap">
+                                                    <Hyperlink NavigateUri="{Binding Url, Mode=OneWay}" RequestNavigate="RepositoryLink_RequestNavigate">
+                                                        <Run Text="{Binding Url, Mode=OneWay}" />
+                                                    </Hyperlink>
+                                                </TextBlock>
+                                            </StackPanel>
+                                            <Button Grid.Column="2" Content="Import" Tag="{Binding}" MinWidth="92" Style="{StaticResource DialogSecondaryButton}" Click="ImportSearchResultButton_Click" />
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </Border>
+
+                <Border x:Name="DiagnosticsPanel"
+                        Background="{DynamicResource PanelBrush}"
+                        BorderBrush="{DynamicResource BorderBrushSoft}"
+                        BorderThickness="1"
+                        CornerRadius="8"
+                        Padding="14"
+                        Margin="0,0,0,16"
+                        Visibility="Collapsed">
+                    <StackPanel>
+                        <TextBlock x:Name="DiagnosticsTitleTextBlock" Foreground="{DynamicResource TextBrush}" FontSize="16" FontWeight="SemiBold" />
+                        <TextBlock x:Name="DiagnosticsSummaryTextBlock" Foreground="{DynamicResource MutedTextBrush}" TextWrapping="Wrap" Margin="0,4,0,0" />
+                        <ItemsControl x:Name="DiagnosticsItemsControl" Margin="0,10,0,0">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding DisplayText}" Foreground="{DynamicResource MutedTextBrush}" TextWrapping="Wrap" Margin="0,0,0,4" />
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </Border>
+
+                <TextBlock Text="Installed Modules" Foreground="{DynamicResource TextBrush}" FontSize="18" FontWeight="SemiBold" Margin="0,0,0,10" />
+                <TextBlock x:Name="NoInstalledModulesTextBlock" Text="No installed modules found." Foreground="{DynamicResource MutedTextBrush}" Visibility="Collapsed" Margin="0,0,0,12" />
+                <ItemsControl x:Name="InstalledModulesItemsControl">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Border Background="{DynamicResource PanelBrush}" BorderBrush="{DynamicResource BorderBrushSoft}" BorderThickness="1" CornerRadius="8" Padding="14" Margin="0,0,0,10">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <Border Width="54"
+                                            Height="54"
+                                            Background="{Binding DisplayColor}"
+                                            CornerRadius="6"
+                                            Padding="4"
+                                            Margin="0,0,12,0"
+                                            VerticalAlignment="Top">
+                                        <Image Source="{Binding AuthorImagePath, Converter={StaticResource ModuleImageSourceConverter}}" Stretch="UniformToFill" />
+                                    </Border>
+                                    <StackPanel Grid.Column="1">
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="{Binding Name}" Foreground="{DynamicResource TextBrush}" FontWeight="SemiBold" FontSize="15" />
+                                            <TextBlock Text="{Binding Version, StringFormat= v{0}}" Foreground="{DynamicResource MutedTextBrush}" Margin="8,1,0,0" />
+                                            <TextBlock Text="{Binding ModuleType}" Foreground="{DynamicResource PrimaryBrush}" Margin="8,1,0,0" FontWeight="SemiBold" />
+                                        </StackPanel>
+                                        <TextBlock Text="{Binding DisplayAuthor, StringFormat=by {0}}" Foreground="{DynamicResource MutedTextBrush}" FontSize="12" Margin="0,3,0,0" />
+                                        <TextBlock Text="{Binding DisplayDescription}" Foreground="{DynamicResource TextBrush}" FontSize="12" Margin="0,4,0,0" TextWrapping="Wrap" />
+                                        <TextBlock Text="{Binding DisplayUrl}" Foreground="{DynamicResource PrimaryBrush}" FontSize="12" Margin="0,3,0,0" TextWrapping="Wrap" />
+                                        <TextBlock Text="{Binding Id}" Foreground="{DynamicResource MutedTextBrush}" FontSize="12" Margin="0,3,0,0" />
+                                        <TextBlock Text="{Binding ModuleApiText}" Foreground="{DynamicResource MutedTextBrush}" FontSize="12" Margin="0,3,0,0" />
+                                        <TextBlock Text="{Binding CompatibilityText}" Foreground="{DynamicResource WarnMetricText}" FontSize="12" Margin="0,3,0,0" TextWrapping="Wrap" />
+                                        <TextBlock Text="{Binding ChangeText}" Foreground="{DynamicResource WarnMetricText}" FontSize="12" Margin="0,3,0,0" />
+                                        <TextBlock Text="{Binding Warning}" Foreground="{DynamicResource MutedTextBrush}" FontSize="12" Margin="0,3,0,0" TextWrapping="Wrap" />
+                                        <TextBlock Text="{Binding ShortHash, StringFormat=Hash {0}}" Foreground="{DynamicResource MutedTextBrush}" FontSize="12" Margin="0,3,0,0" />
+                                        <TextBlock Text="{Binding ImportedText}" Foreground="{DynamicResource MutedTextBrush}" FontSize="12" Margin="0,3,0,0" />
+                                    </StackPanel>
+                                    <StackPanel Grid.Column="2" VerticalAlignment="Top">
+                                        <Button Content="Update"
+                                                Tag="{Binding}"
+                                                MinWidth="92"
+                                                Margin="0,0,0,8"
+                                                Style="{StaticResource DialogSecondaryButton}"
+                                                Click="UpdateFromRepoButton_Click"
+                                                Visibility="{Binding HasSourceUrl, Converter={StaticResource BoolToVis}}" />
+                                        <Button Content="Update from File"
+                                                Tag="{Binding}"
+                                                MinWidth="120"
+                                                Style="{StaticResource DialogSecondaryButton}"
+                                                Click="UpdateFromFileButton_Click" />
+                                        <Button Content="Disable"
+                                                Tag="{Binding}"
+                                                MinWidth="92"
+                                                Margin="0,8,0,0"
+                                                Style="{StaticResource DialogSecondaryButton}"
+                                                Click="DisableModuleButton_Click" />
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+
+                <TextBlock Text="Disabled Modules" Foreground="{DynamicResource TextBrush}" FontSize="18" FontWeight="SemiBold" Margin="0,16,0,10" />
+                <TextBlock x:Name="NoDisabledModulesTextBlock" Text="No disabled modules found." Foreground="{DynamicResource MutedTextBrush}" Visibility="Collapsed" Margin="0,0,0,12" />
+                <ItemsControl x:Name="DisabledModulesItemsControl">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Border Background="{DynamicResource PanelBrush}" BorderBrush="{DynamicResource BorderBrushSoft}" BorderThickness="1" CornerRadius="8" Padding="14" Margin="0,0,0,10">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <Border Width="54"
+                                            Height="54"
+                                            Background="{Binding DisplayColor}"
+                                            CornerRadius="6"
+                                            Padding="4"
+                                            Margin="0,0,12,0"
+                                            VerticalAlignment="Top">
+                                        <Image Source="{Binding AuthorImagePath, Converter={StaticResource ModuleImageSourceConverter}}" Stretch="UniformToFill" />
+                                    </Border>
+                                    <StackPanel Grid.Column="1">
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="{Binding Name}" Foreground="{DynamicResource TextBrush}" FontWeight="SemiBold" FontSize="15" />
+                                            <TextBlock Text="{Binding Version, StringFormat= v{0}}" Foreground="{DynamicResource MutedTextBrush}" Margin="8,1,0,0" />
+                                            <TextBlock Text="{Binding ModuleType}" Foreground="{DynamicResource PrimaryBrush}" Margin="8,1,0,0" FontWeight="SemiBold" />
+                                        </StackPanel>
+                                        <TextBlock Text="{Binding DisplayAuthor, StringFormat=by {0}}" Foreground="{DynamicResource MutedTextBrush}" FontSize="12" Margin="0,3,0,0" />
+                                        <TextBlock Text="{Binding DisplayDescription}" Foreground="{DynamicResource TextBrush}" FontSize="12" Margin="0,4,0,0" TextWrapping="Wrap" />
+                                        <TextBlock Text="{Binding DisplayUrl}" Foreground="{DynamicResource PrimaryBrush}" FontSize="12" Margin="0,3,0,0" TextWrapping="Wrap" />
+                                        <TextBlock Text="{Binding Id}" Foreground="{DynamicResource MutedTextBrush}" FontSize="12" Margin="0,3,0,0" />
+                                        <TextBlock Text="{Binding ModuleApiText}" Foreground="{DynamicResource MutedTextBrush}" FontSize="12" Margin="0,3,0,0" />
+                                        <TextBlock Text="{Binding CompatibilityText}" Foreground="{DynamicResource WarnMetricText}" FontSize="12" Margin="0,3,0,0" TextWrapping="Wrap" />
+                                        <TextBlock Text="{Binding ChangeText}" Foreground="{DynamicResource WarnMetricText}" FontSize="12" Margin="0,3,0,0" />
+                                        <TextBlock Text="{Binding Warning}" Foreground="{DynamicResource MutedTextBrush}" FontSize="12" Margin="0,3,0,0" TextWrapping="Wrap" />
+                                        <TextBlock Text="{Binding ShortHash, StringFormat=Hash {0}}" Foreground="{DynamicResource MutedTextBrush}" FontSize="12" Margin="0,3,0,0" />
+                                        <TextBlock Text="{Binding ImportedText}" Foreground="{DynamicResource MutedTextBrush}" FontSize="12" Margin="0,3,0,0" />
+                                    </StackPanel>
+                                    <StackPanel Grid.Column="2" Orientation="Horizontal">
+                                        <Button Content="Enable" Tag="{Binding}" MinWidth="92" Style="{StaticResource DialogPrimaryButton}" Click="EnableModuleButton_Click" />
+                                        <Button Content="Delete" Tag="{Binding}" MinWidth="92" Margin="8,0,0,0" Style="{StaticResource DialogSecondaryButton}" Click="DeleteDisabledModuleButton_Click" />
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</UserControl>

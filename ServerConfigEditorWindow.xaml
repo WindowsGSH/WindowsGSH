@@ -1,0 +1,76 @@
+<ui:FluentWindow x:Class="WindowsGSH.ServerConfigEditorWindow"
+                 xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                 xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+                 Title="Edit Server Config"
+                 Width="980"
+                 Height="760"
+                 MinWidth="920"
+                 MinHeight="700"
+                 ResizeMode="CanResizeWithGrip"
+                 WindowStartupLocation="CenterOwner"
+                 ExtendsContentIntoTitleBar="True"
+                 Icon="WindowsGSH.ico"
+                 Background="{DynamicResource WorkspaceBrush}">
+    <ui:FluentWindow.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <!-- See ExitDecisionWindow.xaml for why this is merged locally, not in App.xaml. -->
+                <ui:ControlsDictionary />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </ui:FluentWindow.Resources>
+    <Grid Background="{DynamicResource WorkspaceBrush}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <ui:TitleBar x:Name="ConfigEditorTitleBar"
+                     Grid.Row="0"
+                     Title="Edit Server Config"
+                     Background="{DynamicResource WindowChromeBrush}"
+                     Foreground="{DynamicResource TopBarTextBrush}"
+                     ButtonsForeground="{DynamicResource TopBarTextBrush}">
+            <ui:TitleBar.Icon>
+                <ui:ImageIcon Source="WindowsGSH.ico" />
+            </ui:TitleBar.Icon>
+        </ui:TitleBar>
+
+        <Grid Grid.Row="1"
+              Margin="22"
+              Background="{DynamicResource WorkspaceBrush}"
+              TextElement.Foreground="{DynamicResource TextBrush}"
+              PreviewMouseLeftButtonDown="ContentGrid_PreviewMouseLeftButtonDown">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <StackPanel>
+                <TextBlock x:Name="TitleTextBlock" FontSize="24" FontWeight="Bold" Foreground="{DynamicResource TextBrush}" />
+                <TextBlock x:Name="SubtitleTextBlock" Margin="0,4,0,0" Foreground="{DynamicResource MutedTextBrush}" />
+            </StackPanel>
+
+            <Border Grid.Row="1"
+                    Margin="0,18,0,0"
+                    Background="{DynamicResource PanelBrush}"
+                    BorderBrush="{DynamicResource BorderBrushSoft}"
+                    BorderThickness="1"
+                    CornerRadius="8">
+                <TabControl x:Name="ConfigTabControl"
+                            Background="{DynamicResource PanelBrush}"
+                            BorderThickness="0" />
+            </Border>
+
+            <Grid Grid.Row="2" Margin="0,16,0,0">
+                <TextBlock x:Name="StatusTextBlock" VerticalAlignment="Center" Foreground="{DynamicResource MutedTextBrush}" />
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                    <Button Content="Cancel" MinWidth="92" Margin="0,0,8,0" Style="{StaticResource DialogSecondaryButton}" Click="CancelButton_Click" />
+                    <Button x:Name="SaveButton" Content="Save" MinWidth="110" Style="{StaticResource DialogPrimaryButton}" Click="SaveButton_Click" />
+                </StackPanel>
+            </Grid>
+        </Grid>
+    </Grid>
+</ui:FluentWindow>

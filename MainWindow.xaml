@@ -1,0 +1,768 @@
+<ui:FluentWindow x:Class="WindowsGSH.MainWindow"
+                 xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                 xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+                 xmlns:local="clr-namespace:WindowsGSH"
+                 Title="WindowsGSH"
+                 Width="1240"
+                 Height="760"
+                 MinWidth="1080"
+                 MinHeight="660"
+                 ResizeMode="CanResizeWithGrip"
+                 WindowStartupLocation="CenterScreen"
+                 ExtendsContentIntoTitleBar="True"
+                 Icon="WindowsGSH.ico"
+                 Background="{DynamicResource WorkspaceBrush}">
+    <ui:FluentWindow.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <!-- See ExitDecisionWindow.xaml for why this is merged locally, not in App.xaml. -->
+                <ui:ControlsDictionary />
+            </ResourceDictionary.MergedDictionaries>
+        <!-- Override ControlsDictionary's implicit animated CheckBox template for this
+             window and all three embedded views hosted beneath it. -->
+        <Style TargetType="CheckBox" BasedOn="{StaticResource AppCheckBox}" />
+        <SolidColorBrush x:Key="TitleBarBrush" Color="#45B2DC" />
+        <SolidColorBrush x:Key="WindowChromeBrush" Color="#45B2DC" />
+        <SolidColorBrush x:Key="WindowChromeInactiveBrush" Color="#45B2DC" />
+        <SolidColorBrush x:Key="WorkspaceBrush" Color="#F3F5F8" />
+        <SolidColorBrush x:Key="SidebarBrush" Color="#FBFCFE" />
+        <SolidColorBrush x:Key="PanelBrush" Color="#FFFFFF" />
+        <SolidColorBrush x:Key="PanelAltBrush" Color="#F5F7FA" />
+        <SolidColorBrush x:Key="BorderBrushSoft" Color="#D8DEE8" />
+        <SolidColorBrush x:Key="TextBrush" Color="#17202A" />
+        <SolidColorBrush x:Key="MutedTextBrush" Color="#697586" />
+        <SolidColorBrush x:Key="NavSelectedBrush" Color="#EAF3FF" />
+        <SolidColorBrush x:Key="NavHoverBrush" Color="#D7ECFF" />
+        <SolidColorBrush x:Key="GoodBrush" Color="#25B957" />
+        <SolidColorBrush x:Key="WarnBrush" Color="#F2AA2E" />
+        <SolidColorBrush x:Key="BadBrush" Color="#EF2D35" />
+        <SolidColorBrush x:Key="PrimaryBrush" Color="#2F7BDF" />
+        <SolidColorBrush x:Key="ActionBrush" Color="#2A2360" />
+        <SolidColorBrush x:Key="NormalMetricBackground" Color="#F5F7FA" />
+        <SolidColorBrush x:Key="NormalMetricBorder" Color="#E0E6EF" />
+        <SolidColorBrush x:Key="NormalMetricText" Color="#17202A" />
+        <SolidColorBrush x:Key="BadMetricBackground" Color="#FFF3F3" />
+        <SolidColorBrush x:Key="BadMetricBorder" Color="#F3C9CC" />
+        <SolidColorBrush x:Key="BadMetricText" Color="#9F1D26" />
+        <SolidColorBrush x:Key="WarnMetricBackground" Color="#FFF9EA" />
+        <SolidColorBrush x:Key="WarnMetricBorder" Color="#F0DBA5" />
+        <SolidColorBrush x:Key="WarnMetricText" Color="#7A5309" />
+
+        <DropShadowEffect x:Key="CardShadow" Color="#233044" BlurRadius="18" ShadowDepth="4" Opacity="0.13" />
+
+        <Style x:Key="NavButton" TargetType="Button">
+            <Setter Property="Height" Value="38" />
+            <Setter Property="HorizontalContentAlignment" Value="Left" />
+            <Setter Property="Padding" Value="16,0" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="ButtonBorder"
+                                Background="{TemplateBinding Background}"
+                                CornerRadius="0"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter VerticalAlignment="Center"
+                                              HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="ButtonBorder" Property="Background" Value="{DynamicResource NavHoverBrush}" />
+                                <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="ButtonBorder" Property="Background" Value="{DynamicResource NavSelectedBrush}" />
+                                <Setter Property="Foreground" Value="{DynamicResource PrimaryBrush}" />
+                            </Trigger>
+                            <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                                <Setter TargetName="ButtonBorder" Property="Background" Value="{DynamicResource NavSelectedBrush}" />
+                                <Setter Property="Foreground" Value="{DynamicResource PrimaryBrush}" />
+                                <Setter Property="FontWeight" Value="SemiBold" />
+                            </DataTrigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="CardActionButton" TargetType="Button">
+            <Setter Property="MinWidth" Value="42" />
+            <Setter Property="Height" Value="30" />
+            <Setter Property="Padding" Value="10,0" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Background" Value="{DynamicResource ActionBrush}" />
+            <Setter Property="Foreground" Value="White" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Cursor" Value="Hand" />
+        </Style>
+        </ResourceDictionary>
+    </ui:FluentWindow.Resources>
+
+    <Grid Background="{DynamicResource WorkspaceBrush}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <ui:TitleBar x:Name="MainTitleBar"
+                     Grid.Row="0"
+                     Title="WindowsGSH"
+                     Background="{DynamicResource WindowChromeBrush}"
+                     Foreground="{DynamicResource TopBarTextBrush}"
+                     ButtonsForeground="{DynamicResource TopBarTextBrush}">
+            <ui:TitleBar.Icon>
+                <ui:ImageIcon Source="WindowsGSH.ico" />
+            </ui:TitleBar.Icon>
+            <ui:TitleBar.TrailingContent>
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <ComboBox x:Name="ThemeSelector"
+                              Width="104"
+                              MinHeight="26"
+                              AutomationProperties.Name="Application theme"
+                              SelectedIndex="0"
+                              SelectionChanged="ThemeSelector_SelectionChanged">
+                        <ComboBoxItem Content="Dark" />
+                        <ComboBoxItem Content="Light" />
+                    </ComboBox>
+                    <Button Content="Hide"
+                            Margin="8,0,0,0"
+                            ToolTip="Minimise WindowsGSH"
+                            AutomationProperties.Name="Minimise WindowsGSH"
+                            Click="HideButton_Click" />
+                </StackPanel>
+            </ui:TitleBar.TrailingContent>
+        </ui:TitleBar>
+
+        <Grid Grid.Row="1" PreviewMouseLeftButtonDown="ContentGrid_PreviewMouseLeftButtonDown">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="260" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <Popup x:Name="ServerIssuesPopup"
+               PlacementTarget="{Binding ElementName=WarningSummaryButton}"
+               Placement="Bottom"
+               AllowsTransparency="True"
+               StaysOpen="False"
+               VerticalOffset="8">
+            <Border Width="380"
+                    MaxHeight="420"
+                    Background="{DynamicResource PanelBrush}"
+                    BorderBrush="{DynamicResource WarnMetricBorder}"
+                    BorderThickness="1"
+                    CornerRadius="8"
+                    Padding="14"
+                    Effect="{StaticResource CardShadow}">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <TextBlock Text="Server Warnings" Foreground="{DynamicResource TextBrush}" FontSize="16" FontWeight="SemiBold" />
+                    <ScrollViewer Grid.Row="1"
+                                  Margin="0,10,0,0"
+                                  VerticalScrollBarVisibility="Auto"
+                                  HorizontalScrollBarVisibility="Disabled"
+                                  CanContentScroll="True">
+                        <ItemsControl x:Name="ServerIssuesItemsControl">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Background="{DynamicResource WarnMetricBackground}"
+                                            BorderBrush="{DynamicResource WarnMetricBorder}"
+                                            BorderThickness="1"
+                                            CornerRadius="6"
+                                            Padding="10"
+                                            Margin="0,0,0,8">
+                                        <StackPanel>
+                                            <TextBlock Text="{Binding Name}" Foreground="{DynamicResource WarnMetricText}" FontWeight="SemiBold" />
+                                            <TextBlock Text="{Binding Issue}" Foreground="{DynamicResource WarnMetricText}" TextWrapping="Wrap" Margin="0,4,0,0" />
+                                            <Button Content="Ignore Build"
+                                                    Tag="{Binding Server}"
+                                                    Margin="0,8,0,0"
+                                                    HorizontalAlignment="Left"
+                                                    MinWidth="96"
+                                                    Click="IgnoreServerBuildButton_Click">
+                                                <Button.Style>
+                                                    <Style TargetType="Button" BasedOn="{StaticResource DialogSecondaryButton}">
+                                                        <Setter Property="Visibility" Value="Collapsed" />
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding CanIgnoreBuild}" Value="True">
+                                                                <Setter Property="Visibility" Value="Visible" />
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </Button.Style>
+                                            </Button>
+                                        </StackPanel>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
+                </Grid>
+            </Border>
+        </Popup>
+
+        <Border Grid.Column="0" Background="{DynamicResource SidebarBrush}" BorderBrush="{DynamicResource BorderBrushSoft}" BorderThickness="0,0,1,0">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <StackPanel Margin="22,28,22,0">
+                    <TextBlock Text="CONTROL" Foreground="{DynamicResource MutedTextBrush}" FontSize="11" FontWeight="Bold" Margin="16,0,0,12" />
+                    <ItemsControl x:Name="MainNavigationItemsControl">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Button Content="{Binding Label}"
+                                        Tag="{Binding Id}"
+                                        HorizontalAlignment="Stretch"
+                                        Style="{StaticResource NavButton}"
+                                        Click="NavButton_Click" />
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+
+                <Border Grid.Row="2" Margin="22" Padding="14" CornerRadius="8" Background="{DynamicResource PanelAltBrush}" BorderBrush="{DynamicResource BorderBrushSoft}" BorderThickness="1">
+                    <StackPanel>
+                        <TextBlock Text="Local Runtime" Foreground="{DynamicResource TextBrush}" FontWeight="SemiBold" />
+                        <TextBlock Text="Native Windows processes" Foreground="{DynamicResource MutedTextBrush}" FontSize="12" Margin="0,4,0,0" />
+                    </StackPanel>
+                </Border>
+            </Grid>
+        </Border>
+
+        <Grid x:Name="ServersView" Grid.Column="1" Background="{DynamicResource WorkspaceBrush}">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+            <Grid Margin="32,28,32,20">
+                <StackPanel>
+                    <TextBlock Text="Servers" Foreground="{DynamicResource TextBrush}" FontSize="30" FontWeight="Bold" />
+                    <TextBlock Text="Monitor status, resource usage, players, and server configuration." Foreground="{DynamicResource MutedTextBrush}" FontSize="14" Margin="0,4,0,0" />
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                    <Border x:Name="OfflineSummaryBorder" Background="{DynamicResource BadMetricBackground}" BorderBrush="{DynamicResource BadMetricBorder}" BorderThickness="1" CornerRadius="8" Padding="12,8" Margin="0,0,10,0" Visibility="Collapsed">
+                        <StackPanel Orientation="Horizontal">
+                            <Rectangle Fill="{DynamicResource BadBrush}" Width="14" Height="14" RadiusX="2" RadiusY="2" VerticalAlignment="Center" />
+                            <TextBlock x:Name="OfflineSummaryTextBlock" Foreground="{DynamicResource BadMetricText}" FontWeight="SemiBold" Margin="8,0,0,0" />
+                        </StackPanel>
+                    </Border>
+                    <Button x:Name="WarningSummaryButton"
+                            Background="{DynamicResource WarnMetricBackground}"
+                            BorderBrush="{DynamicResource WarnMetricBorder}"
+                            BorderThickness="1"
+                            Padding="12,8"
+                            Margin="0,0,10,0"
+                            Visibility="Collapsed"
+                            Cursor="Hand"
+                            ToolTip="Show server warnings"
+                            AutomationProperties.Name="Show server warnings"
+                            AutomationProperties.HelpText="Open the list of servers requiring attention."
+                            Click="WarningSummaryButton_Click">
+                        <Button.Template>
+                            <ControlTemplate TargetType="Button">
+                                <Border Background="{TemplateBinding Background}"
+                                        BorderBrush="{TemplateBinding BorderBrush}"
+                                        BorderThickness="{TemplateBinding BorderThickness}"
+                                        CornerRadius="8"
+                                        Padding="{TemplateBinding Padding}">
+                                    <ContentPresenter HorizontalAlignment="Center"
+                                                      VerticalAlignment="Center" />
+                                </Border>
+                            </ControlTemplate>
+                        </Button.Template>
+                        <StackPanel Orientation="Horizontal">
+                            <Path Fill="{DynamicResource WarnBrush}" Width="16" Height="16" Stretch="Uniform" Data="M 10 1 L 20 19 L 0 19 Z" />
+                            <TextBlock x:Name="TransitionalSummaryTextBlock" Foreground="{DynamicResource WarnMetricText}" FontWeight="SemiBold" Margin="8,0,0,0" />
+                        </StackPanel>
+                    </Button>
+                    <Border x:Name="OnlineSummaryBorder" Background="{DynamicResource GoodMetricBackground}" BorderBrush="{DynamicResource GoodMetricBorder}" BorderThickness="1" CornerRadius="8" Padding="12,8" Margin="0,0,10,0" Visibility="Collapsed">
+                        <StackPanel Orientation="Horizontal">
+                            <Ellipse Fill="{DynamicResource GoodBrush}" Width="14" Height="14" VerticalAlignment="Center" />
+                            <TextBlock x:Name="OnlineSummaryTextBlock" Foreground="{DynamicResource GoodMetricText}" FontWeight="SemiBold" Margin="8,0,0,0" />
+                        </StackPanel>
+                    </Border>
+                    <Button Content="Bulk Actions" MinHeight="38" Padding="16,0" Margin="0,0,8,0" Style="{StaticResource DialogSecondaryButton}" Click="BulkActionsButton_Click" />
+                    <Button Content="Import Existing" MinHeight="38" Padding="16,0" Margin="0,0,8,0" Style="{StaticResource DialogSecondaryButton}" Click="ImportExistingServerButton_Click" />
+                    <Button Content="Add Server" MinHeight="38" Padding="16,0" Background="{DynamicResource PrimaryBrush}" Foreground="White" BorderThickness="0" FontWeight="SemiBold" Click="AddServerButton_Click" />
+                </StackPanel>
+            </Grid>
+
+            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                <StackPanel Margin="32,0,32,28">
+                    <Border Background="{DynamicResource PanelBrush}"
+                            BorderBrush="{DynamicResource BorderBrushSoft}"
+                            BorderThickness="1"
+                            CornerRadius="12"
+                            Padding="16"
+                            Margin="0,0,0,18">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+
+                            <StackPanel Grid.ColumnSpan="4" Orientation="Horizontal">
+                                <TextBlock Text="Host health"
+                                           Foreground="{DynamicResource TextBrush}"
+                                           FontWeight="SemiBold"
+                                           FontSize="15" />
+                                <TextBlock x:Name="SystemMetricsUpdatedTextBlock"
+                                           Foreground="{DynamicResource MutedTextBrush}"
+                                           FontSize="12"
+                                           Margin="10,2,0,0" />
+                            </StackPanel>
+
+                            <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,12,14,0">
+                                <TextBlock Text="CPU" Foreground="{DynamicResource MutedTextBrush}" FontSize="11" FontWeight="SemiBold" />
+                                <TextBlock x:Name="HostCpuUsageTextBlock" Text="--" Foreground="{DynamicResource TextBrush}" FontSize="18" FontWeight="SemiBold" Margin="0,3,0,0" />
+                                <TextBlock x:Name="HostCpuDetailTextBlock" Text="Loading processor details..." Foreground="{DynamicResource MutedTextBrush}" FontSize="11" TextWrapping="Wrap" Margin="0,3,0,0" />
+                            </StackPanel>
+                            <StackPanel Grid.Row="1" Grid.Column="1" Margin="14,12,14,0">
+                                <TextBlock Text="MEMORY" Foreground="{DynamicResource MutedTextBrush}" FontSize="11" FontWeight="SemiBold" />
+                                <TextBlock x:Name="HostMemoryTextBlock" Text="--" Foreground="{DynamicResource TextBrush}" FontSize="18" FontWeight="SemiBold" Margin="0,3,0,0" />
+                                <TextBlock Text="Used / total physical memory" Foreground="{DynamicResource MutedTextBrush}" FontSize="11" Margin="0,3,0,0" />
+                            </StackPanel>
+                            <StackPanel Grid.Row="1" Grid.Column="2" Margin="14,12,14,0">
+                                <TextBlock Text="APP DRIVE" Foreground="{DynamicResource MutedTextBrush}" FontSize="11" FontWeight="SemiBold" />
+                                <TextBlock x:Name="HostDriveTextBlock" Text="--" Foreground="{DynamicResource TextBrush}" FontSize="14" FontWeight="SemiBold" Margin="0,5,0,0" />
+                                <TextBlock x:Name="HostDriveDetailTextBlock" Text="Loading drive details..." Foreground="{DynamicResource MutedTextBrush}" FontSize="11" Margin="0,3,0,0" />
+                            </StackPanel>
+                            <StackPanel Grid.Row="1" Grid.Column="3" Margin="14,12,0,0">
+                                <TextBlock Text="WINDOWSGSH" Foreground="{DynamicResource MutedTextBrush}" FontSize="11" FontWeight="SemiBold" />
+                                <TextBlock x:Name="HostAppProcessTextBlock" Text="--" Foreground="{DynamicResource TextBrush}" FontSize="14" FontWeight="SemiBold" Margin="0,5,0,0" />
+                                <TextBlock Text="App CPU / private working memory" Foreground="{DynamicResource MutedTextBrush}" FontSize="11" Margin="0,3,0,0" />
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+
+                    <Border x:Name="FirstRunChecklistBorder"
+                            Background="{DynamicResource PanelBrush}"
+                            BorderBrush="{DynamicResource PrimaryBrush}"
+                            BorderThickness="1"
+                            CornerRadius="12"
+                            Padding="18"
+                            Margin="0,0,0,18"
+                            Visibility="Collapsed">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+                            <Grid>
+                                <StackPanel>
+                                    <TextBlock Text="Get WindowsGSH ready"
+                                               Foreground="{DynamicResource TextBrush}"
+                                               FontSize="18"
+                                               FontWeight="SemiBold" />
+                                    <TextBlock Text="A quick first-run checklist based on the current readiness checks."
+                                               Foreground="{DynamicResource MutedTextBrush}"
+                                               Margin="0,4,0,0" />
+                                </StackPanel>
+                                <Button Content="Dismiss"
+                                        HorizontalAlignment="Right"
+                                        VerticalAlignment="Top"
+                                        Style="{StaticResource DialogSecondaryButton}"
+                                        AutomationProperties.HelpText="Hide this first-run checklist permanently."
+                                        Click="DismissFirstRunChecklistButton_Click" />
+                            </Grid>
+                            <ItemsControl x:Name="FirstRunChecklistItemsControl" Grid.Row="1" Margin="0,14,0,0">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Grid Margin="0,0,0,8">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="120" />
+                                                <ColumnDefinition Width="120" />
+                                                <ColumnDefinition Width="*" />
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Text="{Binding Label}" Foreground="{DynamicResource TextBrush}" FontWeight="SemiBold" />
+                                            <TextBlock Grid.Column="1" Text="{Binding StatusText}" Foreground="{DynamicResource WarnMetricText}" FontWeight="SemiBold" />
+                                            <TextBlock Grid.Column="2" Text="{Binding Detail}" Foreground="{DynamicResource MutedTextBrush}" TextWrapping="Wrap" />
+                                        </Grid>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                            <Button Grid.Row="2"
+                                    Content="Open full readiness check"
+                                    HorizontalAlignment="Left"
+                                    Margin="0,6,0,0"
+                                    Style="{StaticResource DialogSecondaryButton}"
+                                    Click="FirstRunReadinessButton_Click" />
+                        </Grid>
+                    </Border>
+
+                    <Border x:Name="EmptyServersPanel"
+                            Background="{DynamicResource PanelBrush}"
+                            BorderBrush="{DynamicResource BorderBrushSoft}"
+                            BorderThickness="1"
+                            CornerRadius="12"
+                            Padding="22"
+                            Margin="0,0,0,18"
+                            Visibility="Collapsed"
+                            AutomationProperties.Name="No servers configured">
+                        <StackPanel>
+                            <TextBlock Text="No servers configured yet"
+                                       Foreground="{DynamicResource TextBrush}"
+                                       FontSize="22"
+                                       FontWeight="SemiBold" />
+                            <TextBlock Text="Install a new server or bring an existing server into WindowsGSH."
+                                       Foreground="{DynamicResource MutedTextBrush}"
+                                       Margin="0,5,0,14" />
+                            <WrapPanel>
+                                <Button Content="Install New Server" Margin="0,0,8,8" Style="{StaticResource DialogPrimaryButton}" Click="AddServerButton_Click" />
+                                <Button Content="Import Existing Server" Margin="0,0,8,8" Style="{StaticResource DialogSecondaryButton}" Click="ImportExistingServerButton_Click" />
+                                <Button Content="Import from WindowsGSM" Margin="0,0,8,8" Style="{StaticResource DialogSecondaryButton}" Click="ImportWindowsGsmButton_Click" />
+                                <Button Content="Open Module Management" Margin="0,0,0,8" Style="{StaticResource DialogSecondaryButton}" Click="OpenModuleManagementButton_Click" />
+                            </WrapPanel>
+                        </StackPanel>
+                    </Border>
+
+                    <ItemsControl x:Name="InstalledServersItemsControl">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border CornerRadius="22"
+                                        Background="{DynamicResource PanelBrush}"
+                                        BorderBrush="{DynamicResource BorderBrushSoft}"
+                                        BorderThickness="1"
+                                        Padding="18"
+                                        Margin="0,0,0,18"
+                                        Effect="{StaticResource CardShadow}">
+                                    <Grid>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                        </Grid.RowDefinitions>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+
+                                        <Ellipse Width="20"
+                                                 Height="20"
+                                                 VerticalAlignment="Center"
+                                                 Margin="0,0,18,0"
+                                                 ToolTip="{Binding StatusText}"
+                                                 AutomationProperties.Name="{Binding StatusText}">
+                                            <Ellipse.Style>
+                                                <Style TargetType="Ellipse">
+                                                    <Setter Property="Fill" Value="{DynamicResource BadBrush}" />
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding Status}" Value="Running">
+                                                            <Setter Property="Fill" Value="{DynamicResource GoodBrush}" />
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding Status}" Value="Warning">
+                                                            <Setter Property="Fill" Value="{DynamicResource WarnBrush}" />
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Ellipse.Style>
+                                        </Ellipse>
+                                        <Grid Grid.Column="1">
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto" />
+                                                <RowDefinition Height="Auto" />
+                                            </Grid.RowDefinitions>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="*" />
+                                            </Grid.ColumnDefinitions>
+
+                                            <TextBlock Grid.Column="0"
+                                                       Text="{Binding Name}"
+                                                       Foreground="{DynamicResource TextBrush}"
+                                                       FontSize="17"
+                                                       FontWeight="SemiBold"
+                                                       TextTrimming="CharacterEllipsis"
+                                                       ToolTip="{Binding Name}"
+                                                       VerticalAlignment="Center"
+                                                       Margin="0,0,10,0" />
+                                            <TextBlock Grid.Column="1"
+                                                       Text="{Binding ModuleId}"
+                                                       Foreground="{DynamicResource MutedTextBrush}"
+                                                       FontSize="12"
+                                                       VerticalAlignment="Center"
+                                                       Margin="10,4,10,0" />
+                                            <TextBlock Grid.Column="2"
+                                                       Foreground="{DynamicResource TextBrush}"
+                                                       FontSize="14"
+                                                       TextTrimming="CharacterEllipsis"
+                                                       ToolTip="{Binding Port}"
+                                                       VerticalAlignment="Center"
+                                                       Margin="10,0,10,0">
+                                                <TextBlock.Text>
+                                                    <MultiBinding StringFormat="{}{0}:{1}">
+                                                        <Binding Path="IpAddress" />
+                                                        <Binding Path="Port" />
+                                                    </MultiBinding>
+                                                </TextBlock.Text>
+                                            </TextBlock>
+
+                                            <Border Grid.Row="1" Grid.Column="0" Background="{DynamicResource NormalMetricBackground}" BorderBrush="{DynamicResource NormalMetricBorder}" BorderThickness="1" CornerRadius="8" Padding="12,9" Margin="0,16,10,0" ToolTip="{Binding LastOperationError}">
+                                                <TextBlock Foreground="{DynamicResource NormalMetricText}" FontWeight="SemiBold">
+                                                    <TextBlock.Style>
+                                                        <Style TargetType="TextBlock">
+                                                            <Setter Property="Text" Value="{Binding CurrentStatusText, StringFormat=Status {0}}" />
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding IsOperationRunning}" Value="True">
+                                                                    <Setter Property="Text" Value="{Binding OperationText, StringFormat=Status {0}}" />
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </TextBlock.Style>
+                                                </TextBlock>
+                                            </Border>
+                                            <Border Grid.Row="1" Grid.Column="1" Background="{DynamicResource NormalMetricBackground}" BorderBrush="{DynamicResource NormalMetricBorder}" BorderThickness="1" CornerRadius="8" Padding="12,9" Margin="0,16,10,0">
+                                                <TextBlock Text="{Binding ProcessId, StringFormat=PID {0}}" Foreground="{DynamicResource NormalMetricText}" FontWeight="SemiBold" />
+                                            </Border>
+                                            <Border Grid.Row="1" Grid.Column="2" Background="{DynamicResource NormalMetricBackground}" BorderBrush="{DynamicResource NormalMetricBorder}" BorderThickness="1" CornerRadius="8" Padding="12,9" Margin="0,16,10,0">
+                                                <StackPanel Orientation="Horizontal">
+                                                    <TextBlock Text="{Binding CpuUsage, StringFormat=CPU {0}}" Foreground="{DynamicResource NormalMetricText}" FontWeight="SemiBold" />
+                                                    <TextBlock Text="{Binding CpuTrend}" Foreground="{DynamicResource MutedTextBrush}" VerticalAlignment="Center" />
+                                                    <TextBlock Text="  " />
+                                                    <TextBlock Text="{Binding MemoryUsage, StringFormat=Memory {0}}" Foreground="{DynamicResource NormalMetricText}" FontWeight="SemiBold" />
+                                                    <TextBlock Text="{Binding MemoryTrend}" Foreground="{DynamicResource MutedTextBrush}" VerticalAlignment="Center" />
+                                                </StackPanel>
+                                            </Border>
+                                            <Border Grid.Row="1" Grid.Column="3" Background="{DynamicResource NormalMetricBackground}" BorderBrush="{DynamicResource NormalMetricBorder}" BorderThickness="1" CornerRadius="8" Padding="12,9" Margin="0,16,10,0">
+                                                <TextBlock Text="{Binding PlayerCount, StringFormat=Players {0}}" Foreground="{DynamicResource NormalMetricText}" FontWeight="SemiBold" />
+                                            </Border>
+                                            <Border Grid.Row="1" Grid.Column="4" Background="{DynamicResource NormalMetricBackground}" BorderBrush="{DynamicResource NormalMetricBorder}" BorderThickness="1" CornerRadius="8" Padding="12,9" Margin="0,16,0,0">
+                                                <TextBlock Text="{Binding Uptime, StringFormat=Uptime {0}}" Foreground="{DynamicResource NormalMetricText}" FontWeight="SemiBold" />
+                                            </Border>
+                                        </Grid>
+                                        <StackPanel Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Top" Orientation="Horizontal">
+                                            <Button Content="Start" Tag="{Binding}" Click="StartServerButton_Click" ToolTip="Start server">
+                                                <Button.Style>
+                                                    <Style TargetType="Button" BasedOn="{StaticResource CardActionButton}">
+                                                        <Setter Property="Visibility" Value="Collapsed" />
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding CanStart}" Value="True">
+                                                                <Setter Property="Visibility" Value="Visible" />
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </Button.Style>
+                                            </Button>
+                                            <Button Content="Update" Tag="{Binding}" Margin="8,0,0,0" Click="UpdateServerButton_Click" ToolTip="Update server">
+                                                <Button.Style>
+                                                    <Style TargetType="Button" BasedOn="{StaticResource CardActionButton}">
+                                                        <Setter Property="Visibility" Value="Collapsed" />
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding CanStart}" Value="True">
+                                                                <Setter Property="Visibility" Value="Visible" />
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </Button.Style>
+                                            </Button>
+                                            <Button Content="Verify Files" Tag="{Binding}" Margin="8,0,0,0" Click="VerifyServerButton_Click" ToolTip="Verify and repair server files">
+                                                <Button.Style>
+                                                    <Style TargetType="Button" BasedOn="{StaticResource CardActionButton}">
+                                                        <Setter Property="Visibility" Value="Collapsed" />
+                                                        <Style.Triggers>
+                                                            <MultiDataTrigger>
+                                                                <MultiDataTrigger.Conditions>
+                                                                    <Condition Binding="{Binding CanStart}" Value="True" />
+                                                                    <Condition Binding="{Binding SupportsVerify}" Value="True" />
+                                                                </MultiDataTrigger.Conditions>
+                                                                <Setter Property="Visibility" Value="Visible" />
+                                                            </MultiDataTrigger>
+                                                            <MultiDataTrigger>
+                                                                <MultiDataTrigger.Conditions>
+                                                                    <Condition Binding="{Binding CanStop}" Value="True" />
+                                                                    <Condition Binding="{Binding AllowsOnlineVerification}" Value="True" />
+                                                                </MultiDataTrigger.Conditions>
+                                                                <Setter Property="Visibility" Value="Visible" />
+                                                            </MultiDataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </Button.Style>
+                                            </Button>
+                                            <Button Content="Ignore" Tag="{Binding}" Margin="8,0,0,0" Click="IgnoreServerBuildButton_Click" ToolTip="Ignore this available Steam build">
+                                                <Button.Style>
+                                                    <Style TargetType="Button" BasedOn="{StaticResource CardActionButton}">
+                                                        <Setter Property="Visibility" Value="Collapsed" />
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding HasUpdateAvailable}" Value="True">
+                                                                <Setter Property="Visibility" Value="Visible" />
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </Button.Style>
+                                            </Button>
+                                            <Button Content="Stop" Tag="{Binding}" Margin="8,0,0,0" Click="StopServerButton_Click" ToolTip="Stop server">
+                                                <Button.Style>
+                                                    <Style TargetType="Button" BasedOn="{StaticResource CardActionButton}">
+                                                        <Setter Property="Visibility" Value="Collapsed" />
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding IsOperationRunning}" Value="True">
+                                                                <Setter Property="Visibility" Value="Visible" />
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding CanStop}" Value="True">
+                                                                <Setter Property="Visibility" Value="Visible" />
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </Button.Style>
+                                            </Button>
+                                            <Button Content="Restart" Tag="{Binding}" Margin="8,0,0,0" Click="RestartServerButton_Click" ToolTip="Restart server">
+                                                <Button.Style>
+                                                    <Style TargetType="Button" BasedOn="{StaticResource CardActionButton}">
+                                                        <Setter Property="Visibility" Value="Collapsed" />
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding CanStop}" Value="True">
+                                                                <Setter Property="Visibility" Value="Visible" />
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </Button.Style>
+                                            </Button>
+                                            <Button Content="Info" Tag="{Binding}" Margin="8,0,0,0" Click="InfoButton_Click" ToolTip="Server info">
+                                                <Button.Style>
+                                                    <Style TargetType="Button" BasedOn="{StaticResource CardActionButton}">
+                                                        <Setter Property="Visibility" Value="Collapsed" />
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding CanShowInfo}" Value="True">
+                                                                <Setter Property="Visibility" Value="Visible" />
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </Button.Style>
+                                            </Button>
+                                            <Button Content="Cfg" Tag="{Binding}" Margin="8,0,0,0" Click="OpenConfigButton_Click" ToolTip="Edit server config">
+                                                <Button.Style>
+                                                    <Style TargetType="Button" BasedOn="{StaticResource CardActionButton}">
+                                                        <Setter Property="Visibility" Value="Collapsed" />
+                                                        <Setter Property="IsEnabled" Value="True" />
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding CanEditConfig}" Value="True">
+                                                                <Setter Property="Visibility" Value="Visible" />
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding IsOperationRunning}" Value="True">
+                                                                <Setter Property="IsEnabled" Value="False" />
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </Button.Style>
+                                            </Button>
+                                            <Button Content="Delete" Tag="{Binding}" Margin="8,0,0,0" Click="DeleteServerButton_Click" ToolTip="Remove server">
+                                                <Button.Style>
+                                                    <Style TargetType="Button" BasedOn="{StaticResource CardActionButton}">
+                                                        <Setter Property="IsEnabled" Value="True" />
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding IsOperationRunning}" Value="True">
+                                                                <Setter Property="IsEnabled" Value="False" />
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding CanStop}" Value="True">
+                                                                <Setter Property="IsEnabled" Value="False" />
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </Button.Style>
+                                            </Button>
+                                        </StackPanel>
+
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+            </ScrollViewer>
+        </Grid>
+
+        <Grid x:Name="LogsView" Grid.Column="1" Background="{DynamicResource WorkspaceBrush}" Visibility="Collapsed">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+            <StackPanel Margin="32,28,32,12">
+                <TextBlock Text="Logs" Foreground="{DynamicResource TextBrush}" FontSize="30" FontWeight="Bold" />
+                <TextBlock Text="WindowsGSH app events, SteamCMD setup, and background checks." Foreground="{DynamicResource MutedTextBrush}" FontSize="14" Margin="0,4,0,0" />
+            </StackPanel>
+
+            <StackPanel Grid.Row="1"
+                        Orientation="Horizontal"
+                        HorizontalAlignment="Right"
+                        Margin="32,0,32,12">
+                <Button x:Name="PauseLogAutoScrollButton"
+                        Content="Pause Auto-scroll"
+                        MinWidth="125"
+                        Margin="0,0,8,0"
+                        Style="{StaticResource DialogSecondaryButton}"
+                        Click="PauseLogAutoScrollButton_Click" />
+                <Button Content="Copy Visible"
+                        MinWidth="105"
+                        Margin="0,0,8,0"
+                        Style="{StaticResource DialogSecondaryButton}"
+                        Click="CopyVisibleLogButton_Click" />
+                <Button Content="Clear View"
+                        MinWidth="95"
+                        Margin="0,0,16,0"
+                        ToolTip="Hide current in-memory lines from this view. Persisted logs and support-bundle history are not deleted."
+                        Style="{StaticResource DialogSecondaryButton}"
+                        Click="ClearLogViewButton_Click" />
+                <TextBlock Text="Filter" Foreground="{DynamicResource MutedTextBrush}" VerticalAlignment="Center" Margin="0,0,8,0" />
+                <ComboBox x:Name="LogFilterComboBox"
+                          Width="180"
+                          MinHeight="32"
+                          SelectionChanged="LogFilterComboBox_SelectionChanged" />
+            </StackPanel>
+
+            <Border Grid.Row="2" Margin="32,0,32,28" Background="#101218" BorderBrush="{DynamicResource BorderBrushSoft}" BorderThickness="1" CornerRadius="8">
+                <TextBox x:Name="AppLogTextBox"
+                         BorderThickness="0"
+                         Background="Transparent"
+                         Foreground="#DDE7F5"
+                         FontFamily="Consolas"
+                         FontSize="12"
+                         Padding="10"
+                         IsReadOnly="True"
+                         IsUndoEnabled="False"
+                         AcceptsReturn="True"
+                         AcceptsTab="True"
+                         Style="{x:Null}"
+                         TextWrapping="Wrap"
+                         HorizontalScrollBarVisibility="Disabled"
+                         VerticalScrollBarVisibility="Auto" />
+            </Border>
+        </Grid>
+
+        <local:AppSettingsView x:Name="ConfigView"
+                               Grid.Column="1"
+                               Visibility="Collapsed" />
+
+        <local:ModuleManagementView x:Name="ModuleManagementView"
+                                    Grid.Column="1"
+                                    Visibility="Collapsed"
+                                    ModulesChanged="ModuleManagementView_ModulesChanged" />
+
+        <local:HostHealthView x:Name="HostHealthView"
+                              Grid.Column="1"
+                              Visibility="Collapsed" />
+        </Grid>
+    </Grid>
+</ui:FluentWindow>

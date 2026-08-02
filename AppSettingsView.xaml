@@ -1,0 +1,954 @@
+<UserControl x:Class="WindowsGSH.AppSettingsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Background="{DynamicResource WorkspaceBrush}">
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <!--
+                MainWindow.xaml (Tier 4 Sub-chunk 17) merges ui:ControlsDictionary locally for its
+                own WPF-UI content, and that merge cascades down through the visual tree into this
+                embedded UserControl's unstyled controls too, since it's hosted as a child inside
+                MainWindow - confirmed via a harness reproducing this exact parent/child resource-
+                scope relationship. This was first treated as a defect to fully reverse (re-merging
+                MahApps' whole Controls.xaml/Fonts.xaml here), but that wholesale approach directly
+                contradicted the maintainer's own stated preference: they explicitly said they liked
+                this view's tab appearance and wanted ServerConfigEditorWindow to match it - and
+                what they were actually looking at when they said that was already this WPF-UI-
+                cascaded look (MainWindow's migration, and this cascade, both predate that request).
+                Re-merging MahApps here would have silently reverted the exact appearance they asked
+                to keep and propagate elsewhere. Only CheckBox is overridden below, for a real,
+                specific, documented defect (WPF-UI's implicit CheckBox template can crash the app -
+                see App.xaml's AppCheckBox comment) - every other control (TabControl/TabItem/
+                Button/TextBox) is left to inherit MainWindow's WPF-UI styling, which is what's
+                actually wanted here, not an accidental side effect to correct.
+            -->
+            <!-- WPF-UI's implicit CheckBox style (cascaded from MainWindow above) is the animated,
+                 crash-prone one App.xaml's AppCheckBox comment documents; repeat the AppCheckBox
+                 alias here so it keeps winning within this local scope regardless of what merges
+                 into MainWindow's own resources. -->
+            <Style TargetType="CheckBox" BasedOn="{StaticResource AppCheckBox}" />
+        </ResourceDictionary>
+    </UserControl.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <Grid Margin="32,28,32,20">
+            <StackPanel>
+                <TextBlock Text="WindowsGSH Config" Foreground="{DynamicResource TextBrush}" FontSize="30" FontWeight="Bold" />
+                <TextBlock Text="App-level behavior for server management." Foreground="{DynamicResource MutedTextBrush}" FontSize="14" Margin="0,4,0,0" />
+            </StackPanel>
+        </Grid>
+
+        <Grid Grid.Row="1" Margin="32,0,32,28" TextElement.Foreground="{DynamicResource TextBrush}">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <Border Background="{DynamicResource PanelBrush}"
+                        BorderBrush="{DynamicResource BorderBrushSoft}"
+                        BorderThickness="1"
+                        CornerRadius="8">
+                    <TabControl x:Name="SettingsTabControl"
+                                Background="{DynamicResource PanelBrush}"
+                                BorderThickness="0">
+                        <TabItem Header="General">
+                            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                                <StackPanel Margin="16">
+                                    <CheckBox x:Name="ParallelServerOperationsCheckBox"
+                                              Style="{StaticResource AppCheckBox}"
+                                              Content="Parallel server backup / update / start"
+                                              Foreground="{DynamicResource TextBrush}"
+                                              FontWeight="SemiBold" />
+                                    <TextBlock Text="When enabled, automatic starts and restarts run per-server backup, update, and boot work in parallel. Leave off if you want SteamCMD/network/disk work serialized."
+                                               Margin="24,6,0,0"
+                                               Foreground="{DynamicResource MutedTextBrush}"
+                                               TextWrapping="Wrap" />
+                                    <TextBlock Text="Backups to keep"
+                                               Margin="0,22,0,6"
+                                               Foreground="{DynamicResource TextBrush}"
+                                               FontWeight="SemiBold" />
+                                    <TextBox x:Name="BackupRetentionTextBox"
+                                             Width="120"
+                                             Height="32"
+                                             HorizontalAlignment="Left"
+                                             VerticalContentAlignment="Center"
+                                             Background="{DynamicResource PanelAltBrush}"
+                                             Foreground="{DynamicResource TextBrush}"
+                                             BorderBrush="{DynamicResource BorderBrushSoft}" />
+                                    <TextBlock Text="Oldest backups are deleted after a new backup is created. Use 0 to keep all backups."
+                                               Margin="0,6,0,0"
+                                               Foreground="{DynamicResource MutedTextBrush}"
+                                               TextWrapping="Wrap" />
+                                    <TextBlock Text="Auto update interval (minutes)"
+                                               Margin="0,22,0,6"
+                                               Foreground="{DynamicResource TextBrush}"
+                                               FontWeight="SemiBold" />
+                                    <TextBox x:Name="AutoUpdateIntervalTextBox"
+                                             Width="120"
+                                             Height="32"
+                                             HorizontalAlignment="Left"
+                                             VerticalContentAlignment="Center"
+                                             Background="{DynamicResource PanelAltBrush}"
+                                             Foreground="{DynamicResource TextBrush}"
+                                             BorderBrush="{DynamicResource BorderBrushSoft}" />
+                                    <TextBlock Text="Use 0 to disable scheduled auto-update checks. Servers still need Auto Update enabled in their CFG, and running servers are skipped."
+                                               Margin="0,6,0,0"
+                                               Foreground="{DynamicResource MutedTextBrush}"
+                                               TextWrapping="Wrap" />
+                                </StackPanel>
+                            </ScrollViewer>
+                        </TabItem>
+                        <TabItem Header="Desktop">
+                            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                                <StackPanel Margin="16">
+                                    <TextBlock Text="Windows desktop integration"
+                                               Foreground="{DynamicResource TextBrush}"
+                                               FontSize="16"
+                                               FontWeight="SemiBold" />
+                                    <CheckBox x:Name="MinimizeToTrayCheckBox"
+                                              Style="{StaticResource AppCheckBox}"
+                                              Content="Minimise to tray"
+                                              Margin="0,18,0,0"
+                                              Foreground="{DynamicResource TextBrush}"
+                                              FontWeight="SemiBold" />
+                                    <TextBlock Text="When the window is minimised, hide it from the taskbar. Use the WindowsGSH tray icon to restore it."
+                                               Margin="24,6,0,0"
+                                               Foreground="{DynamicResource MutedTextBrush}"
+                                               TextWrapping="Wrap" />
+                                    <CheckBox x:Name="StartMinimizedCheckBox"
+                                              Style="{StaticResource AppCheckBox}"
+                                              Content="Start minimised"
+                                              Margin="0,18,0,0"
+                                              Foreground="{DynamicResource TextBrush}"
+                                              FontWeight="SemiBold" />
+                                    <TextBlock Text="Start without bringing the main window to the foreground. If Minimise to tray is enabled, WindowsGSH starts hidden in the tray."
+                                               Margin="24,6,0,0"
+                                               Foreground="{DynamicResource MutedTextBrush}"
+                                               TextWrapping="Wrap" />
+                                    <CheckBox x:Name="StartWithWindowsCheckBox"
+                                              Style="{StaticResource AppCheckBox}"
+                                              Content="Start WindowsGSH when this user signs in"
+                                              Margin="0,18,0,0"
+                                              Foreground="{DynamicResource TextBrush}"
+                                              FontWeight="SemiBold" />
+                                    <TextBlock Text="Uses the current user's Windows startup registration. No administrator rights are required, and the path is updated if this portable app is moved."
+                                               Margin="24,6,0,0"
+                                               Foreground="{DynamicResource MutedTextBrush}"
+                                               TextWrapping="Wrap" />
+                                    <Border Margin="0,22,0,0"
+                                            Padding="12"
+                                            Background="{DynamicResource PanelAltBrush}"
+                                            BorderBrush="{DynamicResource BorderBrushSoft}"
+                                            BorderThickness="1"
+                                            CornerRadius="6">
+                                        <TextBlock Text="Closing WindowsGSH still uses the safe-exit workflow. Minimise to tray does not silently turn the Close button into Hide."
+                                                   Foreground="{DynamicResource MutedTextBrush}"
+                                                   TextWrapping="Wrap" />
+                                    </Border>
+                                </StackPanel>
+                            </ScrollViewer>
+                        </TabItem>
+                        <TabItem Header="Safety / Crash Recovery">
+                            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                                <StackPanel Margin="16">
+                                    <CheckBox x:Name="RestartAppOnCrashCheckBox"
+                                              Style="{StaticResource AppCheckBox}"
+                                              Content="Restart WindowsGSH after a fatal app crash"
+                                              Foreground="{DynamicResource TextBrush}"
+                                              FontWeight="SemiBold" />
+                                    <TextBlock Text="Crash reports are always written to logs/crashes. Restart is loop-protected and mainly useful while developing or testing modules."
+                                               Margin="24,6,0,0"
+                                               Foreground="{DynamicResource MutedTextBrush}"
+                                               TextWrapping="Wrap" />
+                                    <Grid Margin="24,10,0,0">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="170" />
+                                            <ColumnDefinition Width="120" />
+                                            <ColumnDefinition Width="24" />
+                                            <ColumnDefinition Width="170" />
+                                            <ColumnDefinition Width="120" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Text="Suppress at crashes" VerticalAlignment="Center" Foreground="{DynamicResource TextBrush}" />
+                                        <TextBox x:Name="AppCrashRestartMaxAttemptsTextBox"
+                                                 Grid.Column="1"
+                                                 Height="32"
+                                                 VerticalContentAlignment="Center"
+                                                 Background="{DynamicResource PanelAltBrush}"
+                                                 Foreground="{DynamicResource TextBrush}"
+                                                 BorderBrush="{DynamicResource BorderBrushSoft}" />
+                                        <TextBlock Grid.Column="3" Text="Window minutes" VerticalAlignment="Center" Foreground="{DynamicResource TextBrush}" />
+                                        <TextBox x:Name="AppCrashRestartWindowTextBox"
+                                                 Grid.Column="4"
+                                                 Height="32"
+                                                 VerticalContentAlignment="Center"
+                                                 Background="{DynamicResource PanelAltBrush}"
+                                                 Foreground="{DynamicResource TextBrush}"
+                                                 BorderBrush="{DynamicResource BorderBrushSoft}" />
+                                    </Grid>
+                                    <TextBlock Text="When fatal crashes in the window reach the configured count, WindowsGSH writes the crash log but does not relaunch."
+                                               Margin="24,6,0,0"
+                                               Foreground="{DynamicResource MutedTextBrush}"
+                                               TextWrapping="Wrap" />
+                                    <TextBlock Text="External scheduled commands"
+                                               Margin="0,24,0,6"
+                                               Foreground="{DynamicResource TextBrush}"
+                                               FontWeight="SemiBold" />
+                                    <CheckBox x:Name="ExternalScheduledCommandsEnabledCheckBox"
+                                              Style="{StaticResource AppCheckBox}"
+                                              Content="Enable external scheduled commands"
+                                              Foreground="{DynamicResource TextBrush}" />
+                                    <TextBlock Text="Off by default. Commands run directly without a shell, must match the allowlist below, and are recorded in app and server logs."
+                                               Margin="24,6,0,0"
+                                               Foreground="{DynamicResource MutedTextBrush}"
+                                               TextWrapping="Wrap" />
+                                    <TextBlock Text="Allowed executable files or folders"
+                                               Margin="0,12,0,6"
+                                               Foreground="{DynamicResource TextBrush}" />
+                                    <TextBox x:Name="ExternalCommandAllowedPathsTextBox"
+                                             MinHeight="88"
+                                             AcceptsReturn="True"
+                                             TextWrapping="NoWrap"
+                                             VerticalScrollBarVisibility="Auto"
+                                             Background="{DynamicResource PanelAltBrush}"
+                                             Foreground="{DynamicResource TextBrush}"
+                                             BorderBrush="{DynamicResource BorderBrushSoft}" />
+                                    <TextBlock Text="One absolute existing .exe path or folder per line. Known shell hosts such as cmd.exe and PowerShell are always blocked."
+                                               Margin="0,6,0,0"
+                                               Foreground="{DynamicResource MutedTextBrush}"
+                                               TextWrapping="Wrap" />
+                                </StackPanel>
+                            </ScrollViewer>
+                        </TabItem>
+                        <TabItem Header="Diagnostics">
+                            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                                <StackPanel Margin="16">
+                                    <CheckBox x:Name="RuntimeDiagnosticsEnabledCheckBox"
+                                              Style="{StaticResource AppCheckBox}"
+                                              Content="Collect lightweight runtime diagnostics"
+                                              Foreground="{DynamicResource TextBrush}"
+                                              FontWeight="SemiBold" />
+                                    <TextBlock Text="Writes bounded numeric memory, GC, handle, thread, log-rate, and UI-dispatcher queue samples to logs/diagnostics once per minute. No log content, commands, configuration values, paths, or credentials are captured."
+                                               Margin="24,6,0,18"
+                                               Foreground="{DynamicResource MutedTextBrush}"
+                                               TextWrapping="Wrap" />
+                                    <CheckBox x:Name="PublicIpTrackingEnabledCheckBox"
+                                              Style="{StaticResource AppCheckBox}"
+                                              Content="Track public IP changes"
+                                              Foreground="{DynamicResource TextBrush}"
+                                              FontWeight="SemiBold" />
+                                    <TextBlock Text="WindowsGSH checks in the background and stores the last known public IP in app and server network settings."
+                                               Margin="24,6,0,0"
+                                               Foreground="{DynamicResource MutedTextBrush}"
+                                               TextWrapping="Wrap" />
+                                    <Grid Margin="0,10,0,0">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="170" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Text="Lookup endpoint" VerticalAlignment="Center" Foreground="{DynamicResource TextBrush}" />
+                                        <TextBox x:Name="PublicIpEndpointTextBox"
+                                                 Grid.Column="1"
+                                                 Height="32"
+                                                 VerticalContentAlignment="Center"
+                                                 Background="{DynamicResource PanelAltBrush}"
+                                                 Foreground="{DynamicResource TextBrush}"
+                                                 BorderBrush="{DynamicResource BorderBrushSoft}" />
+                                    </Grid>
+                                    <Grid Margin="0,8,0,0">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="170" />
+                                            <ColumnDefinition Width="120" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Text="Check interval" VerticalAlignment="Center" Foreground="{DynamicResource TextBrush}" />
+                                        <TextBox x:Name="PublicIpIntervalTextBox"
+                                                 Grid.Column="1"
+                                                 Height="32"
+                                                 VerticalContentAlignment="Center"
+                                                 Background="{DynamicResource PanelAltBrush}"
+                                                 Foreground="{DynamicResource TextBrush}"
+                                                 BorderBrush="{DynamicResource BorderBrushSoft}" />
+                                    </Grid>
+                                    <TextBlock Text="Interval is in minutes. Public IP lookup failures are logged but do not block startup or server maintenance."
+                                               Margin="170,6,0,0"
+                                               Foreground="{DynamicResource MutedTextBrush}"
+                                               TextWrapping="Wrap" />
+                                    <CheckBox x:Name="ExternalReachabilityChecksEnabledCheckBox"
+                                              Style="{StaticResource AppCheckBox}"
+                                              Content="Enable external reachability checks"
+                                              Foreground="{DynamicResource TextBrush}"
+                                              FontWeight="SemiBold"
+                                              Margin="0,18,0,0" />
+                                    <TextBlock Text="Lets you manually test whether a server's ports are reachable from outside your network, from a server's Health tab. Never runs automatically or in the background - only when you click Test in that tab. Each test sends the port numbers being tested to probe.windowsgsh.com, a WindowsGSH-operated service; that service observes your public IP directly from the request but does not return it to WindowsGSH, and does not receive server names, module/game names, or any credentials. Cloudflare and UKHost4U may retain ordinary infrastructure access logs."
+                                               Margin="24,6,0,0"
+                                               Foreground="{DynamicResource MutedTextBrush}"
+                                               TextWrapping="Wrap" />
+                                    <StackPanel Orientation="Horizontal" Margin="0,22,0,0">
+                                        <Button Content="Readiness Check" Width="140" Style="{StaticResource DialogSecondaryButton}" Click="ReadinessCheckButton_Click" />
+                                        <Button Content="Operation History" Width="150" Margin="8,0,0,0" Style="{StaticResource DialogSecondaryButton}" Click="OperationHistoryButton_Click" />
+                                        <Button x:Name="ExportSupportBundleButton"
+                                                Content="Export Support Bundle"
+                                                Width="170"
+                                                Margin="8,0,0,0"
+                                                Style="{StaticResource DialogSecondaryButton}"
+                                                Click="ExportSupportBundleButton_Click" />
+                                    </StackPanel>
+                                    <Border Margin="0,22,0,0"
+                                            Padding="12"
+                                            Background="{DynamicResource PanelAltBrush}"
+                                            BorderBrush="{DynamicResource BorderBrushSoft}"
+                                            BorderThickness="1"
+                                            CornerRadius="6">
+                                        <StackPanel>
+                                            <TextBlock Text="Version information"
+                                                       Foreground="{DynamicResource TextBrush}"
+                                                       FontWeight="SemiBold" />
+                                            <TextBlock x:Name="VersionInfoTextBlock"
+                                                       Margin="0,6,0,0"
+                                                       Foreground="{DynamicResource MutedTextBrush}" />
+                                            <TextBlock Text="Support bundles include app logs, crash logs, operation history, module manifests, and redacted server configuration summaries. Review the ZIP before sharing."
+                                                       Margin="0,6,0,0"
+                                                       Foreground="{DynamicResource MutedTextBrush}"
+                                                       TextWrapping="Wrap" />
+                                        </StackPanel>
+                                    </Border>
+                                </StackPanel>
+                            </ScrollViewer>
+                        </TabItem>
+                        <TabItem x:Name="DiscordTabItem" Header="Discord">
+                            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                                <StackPanel Margin="16">
+                                    <TextBlock Text="Discord bot"
+                                               Margin="0,22,0,6"
+                                               Foreground="{DynamicResource TextBrush}"
+                                               FontWeight="SemiBold" />
+                                    <Border Padding="12"
+                                            Margin="0,4,0,14"
+                                            Background="{DynamicResource PanelAltBrush}"
+                                            BorderBrush="{DynamicResource BorderBrushSoft}"
+                                            BorderThickness="1"
+                                            CornerRadius="6">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="170" />
+                                                <ColumnDefinition Width="*" />
+                                            </Grid.ColumnDefinitions>
+                                            <StackPanel>
+                                                <TextBlock Text="Connection state"
+                                                           Foreground="{DynamicResource MutedTextBrush}"
+                                                           FontSize="11"
+                                                           FontWeight="SemiBold" />
+                                                <TextBlock x:Name="DiscordConnectionStateTextBlock"
+                                                           Text="Stopped"
+                                                           Margin="0,4,0,0"
+                                                           Foreground="{DynamicResource TextBrush}"
+                                                           FontSize="18"
+                                                           FontWeight="SemiBold" />
+                                            </StackPanel>
+                                            <StackPanel Grid.Column="1">
+                                                <TextBlock x:Name="DiscordConnectionIdentityTextBlock"
+                                                           Text="Bot identity is not available."
+                                                           Foreground="{DynamicResource TextBrush}"
+                                                           TextWrapping="Wrap" />
+                                                <TextBlock x:Name="DiscordConnectionDetailTextBlock"
+                                                           Margin="0,4,0,0"
+                                                           Foreground="{DynamicResource MutedTextBrush}"
+                                                           TextWrapping="Wrap" />
+                                                <Grid Margin="0,10,0,0">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="*" />
+                                                        <ColumnDefinition Width="8" />
+                                                        <ColumnDefinition Width="100" />
+                                                        <ColumnDefinition Width="8" />
+                                                        <ColumnDefinition Width="100" />
+                                                    </Grid.ColumnDefinitions>
+                                                    <TextBox x:Name="DiscordInviteLinkTextBox"
+                                                             IsReadOnly="True"
+                                                             Height="32"
+                                                             VerticalContentAlignment="Center"
+                                                             Background="{DynamicResource PanelBrush}"
+                                                             Foreground="{DynamicResource TextBrush}"
+                                                             BorderBrush="{DynamicResource BorderBrushSoft}" />
+                                                    <Button x:Name="CopyDiscordInviteButton"
+                                                            Grid.Column="2"
+                                                            Content="Copy Invite"
+                                                            IsEnabled="False"
+                                                            Style="{StaticResource DialogSecondaryButton}"
+                                                            Click="CopyDiscordInviteButton_Click" />
+                                                    <Button x:Name="OpenDiscordInviteButton"
+                                                            Grid.Column="4"
+                                                            Content="Open Invite"
+                                                            IsEnabled="False"
+                                                            Style="{StaticResource DialogSecondaryButton}"
+                                                            Click="OpenDiscordInviteButton_Click" />
+                                                </Grid>
+                                            </StackPanel>
+                                        </Grid>
+                                    </Border>
+                                    <CheckBox x:Name="DiscordBotEnabledCheckBox"
+                                              Style="{StaticResource AppCheckBox}"
+                                              Content="Enable Discord bot on startup"
+                                              Foreground="{DynamicResource TextBrush}" />
+                                    <Grid Margin="0,8,0,0">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="170" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Text="Bot token" VerticalAlignment="Center" Foreground="{DynamicResource TextBrush}" />
+                                        <PasswordBox x:Name="DiscordBotTokenBox"
+                                                     Grid.Column="1"
+                                                     Height="32"
+                                                     Background="{DynamicResource PanelAltBrush}"
+                                                     Foreground="{DynamicResource TextBrush}"
+                                                     BorderBrush="{DynamicResource BorderBrushSoft}" />
+                                    </Grid>
+                                    <Grid Margin="0,8,0,0">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="170" />
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="12" />
+                                            <ColumnDefinition Width="120" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Text="Prefix" VerticalAlignment="Center" Foreground="{DynamicResource TextBrush}" />
+                                        <TextBox x:Name="DiscordBotPrefixTextBox"
+                                                 Grid.Column="1"
+                                                 Height="32"
+                                                 VerticalContentAlignment="Center"
+                                                 Background="{DynamicResource PanelAltBrush}"
+                                                 Foreground="{DynamicResource TextBrush}"
+                                                 BorderBrush="{DynamicResource BorderBrushSoft}" />
+                                        <TextBlock Grid.Column="3" Text="Default: !" VerticalAlignment="Center" Foreground="{DynamicResource MutedTextBrush}" />
+                                    </Grid>
+                                    <Grid Margin="0,8,0,0">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="170" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Text="Admin IDs" VerticalAlignment="Top" Foreground="{DynamicResource TextBrush}" />
+                                        <TextBox x:Name="DiscordAdminIdsTextBox"
+                                                 Grid.Column="1"
+                                                 MinHeight="72"
+                                                 AcceptsReturn="True"
+                                                 TextWrapping="NoWrap"
+                                                 VerticalScrollBarVisibility="Auto"
+                                                 Background="{DynamicResource PanelAltBrush}"
+                                                 Foreground="{DynamicResource TextBrush}"
+                                                 BorderBrush="{DynamicResource BorderBrushSoft}" />
+                                    </Grid>
+                                    <TextBlock Text="One Discord user per line. Use: userId 0 for all servers, or userId 1,2,3 for specific server IDs."
+                                               Margin="170,6,0,0"
+                                               Foreground="{DynamicResource MutedTextBrush}"
+                                               TextWrapping="Wrap" />
+                                    <CheckBox x:Name="DiscordAllowDestructiveCommandsCheckBox"
+                                              Style="{StaticResource AppCheckBox}"
+                                              Content="Allow Discord remote control commands"
+                                              Margin="170,10,0,0"
+                                              Foreground="{DynamicResource TextBrush}" />
+                                    <TextBlock Text="When off, Discord can still show status, lists, stats, logs, and permission checks, but cannot start, stop, restart, update, back up, send console commands, or stop all servers."
+                                               Margin="170,6,0,0"
+                                               Foreground="{DynamicResource MutedTextBrush}"
+                                               TextWrapping="Wrap" />
+                                    <Grid Margin="0,8,0,0">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="170" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Text="Application alert channel" VerticalAlignment="Center" Foreground="{DynamicResource TextBrush}" />
+                                        <TextBox x:Name="DiscordNotificationsChannelTextBox"
+                                                 Grid.Column="1"
+                                                 Height="32"
+                                                 VerticalContentAlignment="Center"
+                                                 Background="{DynamicResource PanelAltBrush}"
+                                                 Foreground="{DynamicResource TextBrush}"
+                                                 BorderBrush="{DynamicResource BorderBrushSoft}" />
+                                    </Grid>
+                                    <TextBlock Text="Use a channel name such as Dashboard or Server-Alerts, or paste a Discord channel ID. This channel currently only receives public IP address change alerts - the only application-level alert that isn't tied to any single server. Card, Alert, and Dashboard channels for individual servers (including server start/stop/restart/update alerts) are configured per server, in each server's own Config &gt; Discord tab."
+                                               Margin="170,6,0,0"
+                                               Foreground="{DynamicResource MutedTextBrush}"
+                                               TextWrapping="Wrap" />
+                                    <TextBlock x:Name="DiscordBotHintTextBlock"
+                                               Margin="170,6,0,0"
+                                               Foreground="{DynamicResource MutedTextBrush}"
+                                               TextWrapping="Wrap" />
+                                    <StackPanel Orientation="Horizontal" Margin="170,10,0,0">
+                                        <Button x:Name="StartDiscordBotButton" Content="Start Bot" Width="110" Style="{StaticResource DialogSecondaryButton}" Click="StartDiscordBotButton_Click" />
+                                        <Button x:Name="StopDiscordBotButton" Content="Stop Bot" Width="110" Margin="8,0,0,0" Style="{StaticResource DialogSecondaryButton}" Click="StopDiscordBotButton_Click" />
+                                        <Button Content="Clear Token" Width="110" Margin="8,0,0,0" Style="{StaticResource DialogSecondaryButton}" Click="ClearDiscordTokenButton_Click" />
+                                    </StackPanel>
+                                    <TextBlock Text="Discord webhook alerts"
+                                               Margin="0,24,0,6"
+                                               Foreground="{DynamicResource TextBrush}"
+                                               FontWeight="SemiBold" />
+                                    <CheckBox x:Name="DiscordWebhookEnabledCheckBox"
+                                              Style="{StaticResource AppCheckBox}"
+                                              Content="Enable Discord webhook alerts"
+                                              Foreground="{DynamicResource TextBrush}" />
+                                    <Grid Margin="0,8,0,0">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="170" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Text="Global webhook URL" VerticalAlignment="Center" Foreground="{DynamicResource TextBrush}" />
+                                        <PasswordBox x:Name="DiscordWebhookUrlBox"
+                                                     Grid.Column="1"
+                                                     Height="32"
+                                                     Background="{DynamicResource PanelAltBrush}"
+                                                     Foreground="{DynamicResource TextBrush}"
+                                                     BorderBrush="{DynamicResource BorderBrushSoft}" />
+                                    </Grid>
+                                    <TextBlock x:Name="DiscordWebhookHintTextBlock"
+                                               Margin="170,6,0,0"
+                                               Foreground="{DynamicResource MutedTextBrush}"
+                                               TextWrapping="Wrap" />
+                                    <StackPanel Orientation="Horizontal" Margin="170,10,0,0">
+                                        <Button Content="Test Webhook" Width="120" Style="{StaticResource DialogSecondaryButton}" Click="TestDiscordWebhookButton_Click" />
+                                        <Button Content="Clear Webhook" Width="120" Margin="8,0,0,0" Style="{StaticResource DialogSecondaryButton}" Click="ClearDiscordWebhookButton_Click" />
+                                    </StackPanel>
+                                </StackPanel>
+                            </ScrollViewer>
+                        </TabItem>
+                        <TabItem x:Name="JavaTabItem" Header="Java">
+                            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                                <StackPanel Margin="16">
+                                    <TextBlock Text="Known Java runtimes"
+                                               Foreground="{DynamicResource TextBrush}"
+                                               FontWeight="SemiBold" />
+                                    <TextBlock Text="WindowsGSH uses this app-level cache to populate per-server Java runtime choices. Detection checks these paths, JAVA_HOME, and PATH."
+                                               Margin="0,6,0,0"
+                                               Foreground="{DynamicResource MutedTextBrush}"
+                                               TextWrapping="Wrap" />
+                                    <DataGrid x:Name="KnownJavaRuntimesDataGrid"
+                                              MinHeight="150"
+                                              MaxHeight="280"
+                                              Margin="0,10,0,0"
+                                              AutoGenerateColumns="False"
+                                              CanUserAddRows="False"
+                                              CanUserDeleteRows="False"
+                                              IsReadOnly="True"
+                                              SelectionMode="Single"
+                                              HeadersVisibility="Column"
+                                              GridLinesVisibility="Horizontal"
+                                              Background="{DynamicResource PanelAltBrush}"
+                                              Foreground="{DynamicResource TextBrush}"
+                                              BorderBrush="{DynamicResource BorderBrushSoft}">
+                                        <DataGrid.Columns>
+                                            <DataGridTextColumn Header="Version" Binding="{Binding Version}" Width="90" />
+                                            <DataGridTextColumn Header="Vendor" Binding="{Binding Vendor}" Width="120" />
+                                            <DataGridTextColumn Header="Path" Binding="{Binding ExecutablePath}" Width="*" />
+                                            <DataGridTextColumn Header="Status" Binding="{Binding Status}" Width="150" />
+                                        </DataGrid.Columns>
+                                    </DataGrid>
+                                    <TextBlock x:Name="JavaRuntimeHintTextBlock"
+                                               Margin="0,6,0,0"
+                                               Foreground="{DynamicResource MutedTextBrush}"
+                                               TextWrapping="Wrap" />
+                                    <Grid Margin="0,10,0,0">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="8" />
+                                            <ColumnDefinition Width="92" />
+                                            <ColumnDefinition Width="8" />
+                                            <ColumnDefinition Width="92" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBox x:Name="JavaRuntimePathTextBox"
+                                                 Height="32"
+                                                 VerticalContentAlignment="Center"
+                                                 Background="{DynamicResource PanelAltBrush}"
+                                                 Foreground="{DynamicResource TextBrush}"
+                                                 BorderBrush="{DynamicResource BorderBrushSoft}" />
+                                        <Button Grid.Column="2"
+                                                Content="Browse"
+                                                Style="{StaticResource DialogSecondaryButton}"
+                                                Click="BrowseJavaRuntimeButton_Click" />
+                                        <Button x:Name="AddJavaRuntimeButton"
+                                                Grid.Column="4"
+                                                Content="Add Path"
+                                                Style="{StaticResource DialogSecondaryButton}"
+                                                Click="AddJavaRuntimeButton_Click" />
+                                    </Grid>
+                                    <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+                                        <Button x:Name="DetectJavaRuntimesButton" Content="Detect Runtimes" Width="130" Style="{StaticResource DialogSecondaryButton}" Click="DetectJavaRuntimesButton_Click" />
+                                        <Button Content="Remove Selected" Width="140" Margin="8,0,0,0" Style="{StaticResource DialogSecondaryButton}" Click="RemoveJavaRuntimeButton_Click" />
+                                        <Button Content="Clear Cache" Width="110" Margin="8,0,0,0" Style="{StaticResource DialogSecondaryButton}" Click="ClearJavaRuntimesButton_Click" />
+                                    </StackPanel>
+                                    <TextBlock Text="Managed Java runtimes"
+                                               Margin="0,24,0,0"
+                                               Foreground="{DynamicResource TextBrush}"
+                                               FontWeight="SemiBold" />
+                                    <TextBlock Text="Refresh the trusted Eclipse Adoptium catalogue, then explicitly install the runtime versions you want WindowsGSH to manage."
+                                               Margin="0,6,0,0"
+                                               Foreground="{DynamicResource MutedTextBrush}"
+                                               TextWrapping="Wrap" />
+                                    <DataGrid x:Name="ManagedJavaRuntimesDataGrid"
+                                              MinHeight="140"
+                                              MaxHeight="260"
+                                              Margin="0,10,0,0"
+                                              AutoGenerateColumns="False"
+                                              CanUserAddRows="False"
+                                              CanUserDeleteRows="False"
+                                              IsReadOnly="True"
+                                              SelectionMode="Single"
+                                              HeadersVisibility="Column"
+                                              GridLinesVisibility="Horizontal"
+                                              Background="{DynamicResource PanelAltBrush}"
+                                              Foreground="{DynamicResource TextBrush}"
+                                              BorderBrush="{DynamicResource BorderBrushSoft}">
+                                        <DataGrid.Columns>
+                                            <DataGridTextColumn Header="Version" Binding="{Binding Version}" Width="*" />
+                                            <DataGridTextColumn Header="Architecture" Binding="{Binding Architecture}" Width="100" />
+                                            <DataGridTextColumn Header="Status" Binding="{Binding Status}" Width="120" />
+                                        </DataGrid.Columns>
+                                    </DataGrid>
+                                    <TextBlock x:Name="ManagedJavaRuntimeHintTextBlock"
+                                               Margin="0,6,0,0"
+                                               Foreground="{DynamicResource MutedTextBrush}"
+                                               TextWrapping="Wrap" />
+                                    <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+                                        <Button x:Name="RefreshManagedJavaButton" Content="Refresh Catalogue" Width="140" Style="{StaticResource DialogSecondaryButton}" Click="RefreshManagedJavaButton_Click" />
+                                        <Button x:Name="InstallManagedJavaButton" Content="Install / Update" Width="130" Margin="8,0,0,0" Style="{StaticResource DialogSecondaryButton}" Click="InstallManagedJavaButton_Click" />
+                                        <Button x:Name="RepairManagedJavaButton" Content="Repair" Width="90" Margin="8,0,0,0" Style="{StaticResource DialogSecondaryButton}" Click="RepairManagedJavaButton_Click" />
+                                        <Button x:Name="RemoveManagedJavaButton" Content="Remove" Width="90" Margin="8,0,0,0" Style="{StaticResource DialogSecondaryButton}" Click="RemoveManagedJavaButton_Click" />
+                                        <Button x:Name="CancelManagedJavaButton" Content="Cancel" Width="90" Margin="8,0,0,0" IsEnabled="False" Style="{StaticResource DialogSecondaryButton}" Click="CancelManagedJavaButton_Click" />
+                                    </StackPanel>
+                                    <Border Margin="0,22,0,0"
+                                            Padding="12"
+                                            Background="{DynamicResource PanelAltBrush}"
+                                            BorderBrush="{DynamicResource BorderBrushSoft}"
+                                            BorderThickness="1"
+                                            CornerRadius="6">
+                                        <StackPanel>
+                                            <TextBlock Text="Java installation is always explicit"
+                                                       Foreground="{DynamicResource TextBrush}"
+                                                       FontWeight="SemiBold" />
+                                            <TextBlock Text="WindowsGSH never downloads Java silently. Managed runtime downloads begin only after you select a catalogue entry and click Install / Update."
+                                                       Margin="0,5,0,0"
+                                                       Foreground="{DynamicResource MutedTextBrush}"
+                                                       TextWrapping="Wrap" />
+                                        </StackPanel>
+                                    </Border>
+                                </StackPanel>
+                            </ScrollViewer>
+                        </TabItem>
+                        <TabItem Header="Steam">
+                            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                                <StackPanel Margin="16">
+                                    <TextBlock Text="Steam credentials"
+                                               Margin="0,22,0,6"
+                                               Foreground="{DynamicResource TextBrush}"
+                                               FontWeight="SemiBold" />
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="170" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Text="Username" VerticalAlignment="Center" Foreground="{DynamicResource TextBrush}" />
+                                        <TextBox x:Name="SteamUsernameTextBox"
+                                                 Grid.Column="1"
+                                                 Height="32"
+                                                 VerticalContentAlignment="Center"
+                                                 Background="{DynamicResource PanelAltBrush}"
+                                                 Foreground="{DynamicResource TextBrush}"
+                                                 BorderBrush="{DynamicResource BorderBrushSoft}" />
+                                    </Grid>
+                                    <Grid Margin="0,8,0,0">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="170" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Text="Password" VerticalAlignment="Center" Foreground="{DynamicResource TextBrush}" />
+                                        <PasswordBox x:Name="SteamPasswordBox"
+                                                     Grid.Column="1"
+                                                     Height="32"
+                                                     Background="{DynamicResource PanelAltBrush}"
+                                                     Foreground="{DynamicResource TextBrush}"
+                                                     BorderBrush="{DynamicResource BorderBrushSoft}" />
+                                    </Grid>
+                                    <TextBlock x:Name="SteamCredentialHintTextBlock"
+                                               Margin="170,6,0,0"
+                                               Foreground="{DynamicResource MutedTextBrush}"
+                                               TextWrapping="Wrap" />
+                                    <StackPanel Orientation="Horizontal" Margin="170,10,0,0">
+                                        <Button Content="Save Steam Login" Width="150" Style="{StaticResource DialogSecondaryButton}" Click="SaveSteamCredentialsButton_Click" />
+                                        <Button Content="Clear Steam Login" Width="150" Margin="8,0,0,0" Style="{StaticResource DialogSecondaryButton}" Click="ClearSteamCredentialsButton_Click" />
+                                    </StackPanel>
+                                    <Border Margin="0,22,0,0"
+                                            Padding="12"
+                                            Background="{DynamicResource PanelAltBrush}"
+                                            BorderBrush="{DynamicResource BorderBrushSoft}"
+                                            BorderThickness="1"
+                                            CornerRadius="6">
+                                        <StackPanel>
+                                            <CheckBox x:Name="PersistentAuthenticatedSteamUpdatesCheckBox"
+                                                      Style="{StaticResource AppCheckBox}"
+                                                      Content="Enable unattended authenticated Steam updates"
+                                                      Foreground="{DynamicResource TextBrush}"
+                                                      FontWeight="SemiBold" />
+                                            <TextBlock Text="For games that cannot use anonymous SteamCMD login, WindowsGSH downloads the pinned DepotDownloader 3.4.0 helper from SteamRE on first use. The helper is GPLv2 software. Steam Guard approval is required once, then its reusable session is protected with Windows user encryption between updates."
+                                                       Margin="24,6,0,0"
+                                                       Foreground="{DynamicResource MutedTextBrush}"
+                                                       TextWrapping="Wrap" />
+                                            <TextBlock x:Name="PersistentSteamSessionStatusTextBlock"
+                                                       Margin="24,6,0,0"
+                                                       Foreground="{DynamicResource MutedTextBrush}"
+                                                       TextWrapping="Wrap" />
+                                        </StackPanel>
+                                    </Border>
+                                </StackPanel>
+                            </ScrollViewer>
+                        </TabItem>
+
+                        <TabItem Header="Web Access">
+                            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                                <StackPanel Margin="16,12,16,16">
+
+                                    <TextBlock Text="Web interface"
+                                               FontSize="13"
+                                               FontWeight="SemiBold"
+                                               Foreground="{DynamicResource TextBrush}"
+                                               Margin="0,0,0,6" />
+                                    <CheckBox x:Name="WebEnabledCheckBox"
+                                              Style="{StaticResource AppCheckBox}"
+                                              Content="Start web server on launch"
+                                              Foreground="{DynamicResource TextBrush}"
+                                              Margin="0,0,0,4"
+                                              Checked="WebEnabledCheckBox_Changed"
+                                              Unchecked="WebEnabledCheckBox_Changed" />
+                                    <TextBlock Text="Allows browser-based access to your servers on the local network. Disabled by default. Takes effect on the next launch."
+                                               Margin="20,0,0,0"
+                                               FontSize="11"
+                                               Foreground="{DynamicResource MutedTextBrush}"
+                                               TextWrapping="Wrap" />
+
+                                    <Separator Margin="0,16,0,16"
+                                               Background="{DynamicResource BorderBrushSoft}" />
+
+                                    <TextBlock Text="Port"
+                                               FontSize="13"
+                                               FontWeight="SemiBold"
+                                               Foreground="{DynamicResource TextBrush}"
+                                               Margin="0,0,0,6" />
+                                    <TextBox x:Name="WebPortTextBox"
+                                             Width="90"
+                                             HorizontalAlignment="Left"
+                                             Margin="0,0,0,4"
+                                             TextChanged="WebPortTextBox_TextChanged" />
+                                    <TextBlock Text="Default: 5000. Must be between 1024 and 65535."
+                                               FontSize="11"
+                                               Foreground="{DynamicResource MutedTextBrush}" />
+
+                                    <Separator Margin="0,16,0,16"
+                                               Background="{DynamicResource BorderBrushSoft}" />
+
+                                    <TextBlock Text="Bind address"
+                                               FontSize="13"
+                                               FontWeight="SemiBold"
+                                               Foreground="{DynamicResource TextBrush}"
+                                               Margin="0,0,0,6" />
+                                    <TextBox x:Name="WebBindAddressTextBox"
+                                             Width="180"
+                                             HorizontalAlignment="Left"
+                                             Margin="0,0,0,4"
+                                             TextChanged="WebBindAddressTextBox_TextChanged" />
+                                    <TextBlock FontSize="11"
+                                               Foreground="{DynamicResource MutedTextBrush}"
+                                               TextWrapping="Wrap"
+                                               Text="Default: 127.0.0.1 (this machine only). Use 0.0.0.0 to accept connections from all network interfaces. For Cloudflare Tunnel, keep this as 127.0.0.1 and point cloudflared at http://127.0.0.1:&lt;port&gt;." />
+                                    <TextBlock x:Name="WebLanWarningTextBlock"
+                                               Visibility="Collapsed"
+                                               FontSize="11"
+                                               Foreground="{DynamicResource WarnMetricText}"
+                                               TextWrapping="Wrap"
+                                               Margin="0,4,0,0"
+                                               Text="&#x26A0; Warning: LAN access exposes the WindowsGSH Web API to other devices on your network. Because HTTPS is not enabled, login credentials, bearer tokens, and refresh cookies may be visible to devices on the same network. Use this only on trusted networks. For Cloudflare Tunnel, keep the bind address as 127.0.0.1 and point cloudflared at http://127.0.0.1:&lt;port&gt;." />
+
+                                    <Separator Margin="0,16,0,16"
+                                               Background="{DynamicResource BorderBrushSoft}" />
+
+                                    <TextBlock Text="Reverse proxy"
+                                               FontSize="13"
+                                               FontWeight="SemiBold"
+                                               Foreground="{DynamicResource TextBrush}"
+                                               Margin="0,0,0,6" />
+                                    <CheckBox x:Name="WebTrustForwardedHeadersCheckBox"
+                                              Style="{StaticResource AppCheckBox}"
+                                              Content="Trust X-Forwarded-For and X-Forwarded-Proto headers"
+                                              Foreground="{DynamicResource TextBrush}"
+                                              Margin="0,0,0,4" />
+                                    <TextBlock Text="Enable when the web server runs behind a local reverse proxy such as Cloudflare Tunnel. Required for the refresh cookie to be marked Secure over HTTPS. Only enable if a trusted proxy on this machine forwards requests to localhost. Takes effect on the next launch."
+                                               Margin="20,0,0,0"
+                                               FontSize="11"
+                                               Foreground="{DynamicResource MutedTextBrush}"
+                                               TextWrapping="Wrap" />
+
+                                    <Separator Margin="0,16,0,16"
+                                               Background="{DynamicResource BorderBrushSoft}" />
+
+                                    <TextBlock Text="Console WebSocket authentication"
+                                               FontSize="13"
+                                               FontWeight="SemiBold"
+                                               Foreground="{DynamicResource TextBrush}"
+                                               Margin="0,0,0,6" />
+                                    <CheckBox x:Name="AllowLegacyWebSocketQueryStringAuthCheckBox"
+                                              Style="{StaticResource AppCheckBox}"
+                                              Content="Allow the legacy ?token= query-string console login"
+                                              Foreground="{DynamicResource TextBrush}"
+                                              Margin="0,0,0,4" />
+                                    <TextBlock Text="The web console's browser UI never uses this — it authenticates the WebSocket connection out of the URL instead. This only affects non-browser API clients that pass the access token in the connection URL, which can then appear in server/proxy logs and browser history. Off by default for new installs; kept on automatically when upgrading an existing install so nothing already relying on it breaks. Takes effect on the next launch."
+                                               Margin="20,0,0,0"
+                                               FontSize="11"
+                                               Foreground="{DynamicResource MutedTextBrush}"
+                                               TextWrapping="Wrap" />
+
+                                    <Separator Margin="0,16,0,16"
+                                               Background="{DynamicResource BorderBrushSoft}" />
+
+                                    <TextBlock x:Name="WebServerStatusTextBlock"
+                                               FontSize="11"
+                                               Foreground="{DynamicResource MutedTextBrush}"
+                                               Margin="0,0,0,4" />
+                                    <TextBlock x:Name="WebRestartRequiredTextBlock"
+                                               FontSize="11"
+                                               Foreground="{DynamicResource MutedTextBrush}"
+                                               Visibility="Collapsed"
+                                               Text="Changes take effect after restarting WindowsGSH." />
+
+                                    <Separator Margin="0,16,0,16"
+                                               Background="{DynamicResource BorderBrushSoft}" />
+
+                                    <TextBlock Text="Web users"
+                                               FontSize="13"
+                                               FontWeight="SemiBold"
+                                               Foreground="{DynamicResource TextBrush}"
+                                               Margin="0,0,0,4" />
+                                    <TextBlock Text="Accounts that can log in to the web interface. Managed from this desktop app only."
+                                               FontSize="11"
+                                               Foreground="{DynamicResource MutedTextBrush}"
+                                               TextWrapping="Wrap"
+                                               Margin="0,0,0,10" />
+
+                                    <ListBox x:Name="WebUsersListBox"
+                                             MaxHeight="160"
+                                             Margin="0,0,0,8"
+                                             Background="{DynamicResource InputBrush}"
+                                             BorderBrush="{DynamicResource BorderBrush}"
+                                             Foreground="{DynamicResource TextBrush}" />
+
+                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
+                                        <Button x:Name="DeleteWebUserButton"
+                                                Content="Delete selected"
+                                                Width="110"
+                                                Style="{StaticResource DialogSecondaryButton}"
+                                                Click="DeleteWebUserButton_Click" />
+                                        <Button x:Name="ResetWebUserPasswordButton"
+                                                Content="Reset password"
+                                                Width="110"
+                                                Margin="8,0,0,0"
+                                                Style="{StaticResource DialogSecondaryButton}"
+                                                Click="ResetWebUserPasswordButton_Click" />
+                                    </StackPanel>
+
+                                    <TextBlock Text="Create user"
+                                               FontSize="12"
+                                               FontWeight="SemiBold"
+                                               Foreground="{DynamicResource TextBrush}"
+                                               Margin="0,0,0,6" />
+                                    <Grid Margin="0,0,0,6">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="8" />
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="8" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBox x:Name="NewWebUsernameTextBox"
+                                                 Grid.Column="0"
+                                                 Tag="Username" />
+                                        <PasswordBox x:Name="NewWebPasswordBox"
+                                                     Grid.Column="2" />
+                                        <ComboBox x:Name="NewWebRoleComboBox"
+                                                  Grid.Column="4"
+                                                  Width="90">
+                                            <ComboBoxItem Content="Viewer" IsSelected="True" />
+                                            <ComboBoxItem Content="Operator" />
+                                            <ComboBoxItem Content="Admin" />
+                                        </ComboBox>
+                                    </Grid>
+                                    <Button x:Name="CreateWebUserButton"
+                                            Content="Create user"
+                                            Width="90"
+                                            HorizontalAlignment="Left"
+                                            Style="{StaticResource DialogSecondaryButton}"
+                                            Click="CreateWebUserButton_Click" />
+                                    <TextBlock x:Name="WebUserFeedbackTextBlock"
+                                               FontSize="11"
+                                               Foreground="{DynamicResource MutedTextBrush}"
+                                               Margin="0,6,0,0"
+                                               TextWrapping="Wrap" />
+
+                                </StackPanel>
+                            </ScrollViewer>
+                        </TabItem>
+
+                        <TabItem Header="Accessibility">
+                            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                                <StackPanel Margin="16,12,16,16">
+
+                                    <TextBlock Text="Visual effects"
+                                               FontSize="13"
+                                               FontWeight="SemiBold"
+                                               Foreground="{DynamicResource TextBrush}"
+                                               Margin="0,0,0,6" />
+                                    <CheckBox x:Name="ReducedMotionCheckBox"
+                                              Style="{StaticResource AppCheckBox}"
+                                              Content="Reduce motion"
+                                              Foreground="{DynamicResource TextBrush}"
+                                              Margin="0,0,0,4" />
+                                    <TextBlock Text="Disables optional WindowsGSH motion effects while preserving textual status and notification meaning. Applies immediately on save."
+                                               Margin="20,0,0,0"
+                                               FontSize="11"
+                                               Foreground="{DynamicResource MutedTextBrush}"
+                                               TextWrapping="Wrap" />
+
+                                    <Separator Margin="0,16,0,16"
+                                               Background="{DynamicResource BorderBrushSoft}" />
+
+                                    <TextBlock Text="GPU and rendering"
+                                               FontSize="13"
+                                               FontWeight="SemiBold"
+                                               Foreground="{DynamicResource TextBrush}"
+                                               Margin="0,0,0,6" />
+                                    <CheckBox x:Name="SoftwareRenderingCheckBox"
+                                              Style="{StaticResource AppCheckBox}"
+                                              Content="Use software rendering (CPU only)"
+                                              Foreground="{DynamicResource TextBrush}"
+                                              Margin="0,0,0,4" />
+                                    <TextBlock Text="Forces WPF to use CPU rendering instead of GPU acceleration. Useful when graphical glitches appear over RDP or with certain GPU drivers. Takes effect on the next launch."
+                                               Margin="20,0,0,0"
+                                               FontSize="11"
+                                               Foreground="{DynamicResource MutedTextBrush}"
+                                               TextWrapping="Wrap" />
+                                    <TextBlock x:Name="CurrentRenderingModeTextBlock"
+                                               Margin="20,6,0,0"
+                                               FontSize="11"
+                                               Foreground="{DynamicResource MutedTextBrush}" />
+
+                                </StackPanel>
+                            </ScrollViewer>
+                        </TabItem>
+
+                    </TabControl>
+                </Border>
+
+                <Grid Grid.Row="1" Margin="0,16,0,0">
+                    <TextBlock x:Name="ConfigStatusTextBlock" VerticalAlignment="Center" Foreground="{DynamicResource MutedTextBrush}" />
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                        <Button Content="Cancel" Width="92" Margin="0,0,8,0" IsCancel="True" Style="{StaticResource DialogSecondaryButton}" Click="CancelConfigButton_Click" />
+                        <Button Content="Save" Width="110" IsDefault="True" Style="{StaticResource DialogPrimaryButton}" Click="SaveConfigButton_Click" />
+                    </StackPanel>
+                </Grid>
+        </Grid>
+    </Grid>
+</UserControl>

@@ -1,0 +1,70 @@
+name: WindowsGSM import issue
+description: Report a problem importing a WindowsGSM-managed server.
+title: "[WindowsGSM Import]: "
+labels: ["windowsgsm", "import"]
+body:
+  - type: input
+    id: version
+    attributes:
+      label: WindowsGSH version
+      placeholder: "Example: v0.1.0"
+    validations:
+      required: true
+  - type: input
+    id: windowsgsm_version
+    attributes:
+      label: WindowsGSM version
+      placeholder: "Example: 1.23.4"
+  - type: input
+    id: game_module
+    attributes:
+      label: Game/module
+      placeholder: "Example: Icarus"
+    validations:
+      required: true
+  - type: dropdown
+    id: import_mode
+    attributes:
+      label: Import mode
+      options:
+        - Copy
+        - Adopt
+        - Preview/scan only
+        - Not sure
+    validations:
+      required: true
+  - type: textarea
+    id: scan_summary
+    attributes:
+      label: Import preview summary
+      description: Include Imported/Defaulted/Missing/Needs Review counts and any warnings shown.
+      render: text
+  - type: textarea
+    id: problem
+    attributes:
+      label: What happened?
+      description: Explain where the import failed or what looked wrong after import.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected result
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs/screenshots
+      description: Add screenshots, log lines, or sanitized `import.json` details. Do not paste passwords, tokens, or Steam branch passwords.
+      render: text
+  - type: dropdown
+    id: windowsgsm_still_managing
+    attributes:
+      label: Was WindowsGSM also running or managing the same server after import?
+      options:
+        - "No"
+        - "Yes"
+        - "Not sure"
+    validations:
+      required: true

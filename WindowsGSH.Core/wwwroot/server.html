@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Server – WindowsGSH</title>
+  <link rel="stylesheet" href="/css/app.css">
+</head>
+<body>
+  <nav class="nav" id="nav"></nav>
+
+  <main class="page">
+    <div class="page-header">
+      <a class="back-link" href="/dashboard">← Dashboard</a>
+      <h2 class="page-title" id="serverTitle">Loading…</h2>
+    </div>
+
+    <!-- Action buttons (Operator+ only; rendered by JS) -->
+    <div id="actionRow" class="action-row"></div>
+
+    <!-- Stats -->
+    <div class="stat-grid" id="statGrid"></div>
+
+    <!-- Recent console output -->
+    <div class="section-heading-row">
+      <h3 class="section-heading">Recent output</h3>
+      <a id="consoleLink" href="#" class="small-link">Full console →</a>
+    </div>
+    <div class="console-output small" id="consoleOutput" aria-label="Recent console output"></div>
+  </main>
+
+  <script type="module" src="/js/server.js"></script>
+</body>
+</html>

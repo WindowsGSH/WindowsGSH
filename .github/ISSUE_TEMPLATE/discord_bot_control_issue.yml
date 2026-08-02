@@ -1,0 +1,68 @@
+name: Discord bot/control issue
+description: Report a problem with Discord setup, status panels, notifications, or remote control.
+title: "[Discord]: "
+labels: ["discord"]
+body:
+  - type: input
+    id: version
+    attributes:
+      label: WindowsGSH version
+      placeholder: "Example: v0.1.0"
+    validations:
+      required: true
+  - type: dropdown
+    id: discord_area
+    attributes:
+      label: Area
+      options:
+        - Bot startup/setup
+        - Dashboard/status panels
+        - Server channel embed
+        - Notification channel messages
+        - Read-only commands
+        - Remote control commands
+        - Stop/restart buttons
+        - Permissions/admin access
+        - Other
+    validations:
+      required: true
+  - type: dropdown
+    id: remote_control
+    attributes:
+      label: Was Discord remote control enabled?
+      options:
+        - "No"
+        - "Yes"
+        - "Not sure"
+    validations:
+      required: true
+  - type: input
+    id: channel_setup
+    attributes:
+      label: Channel setup
+      description: Describe dashboard, notification, and per-server channel names/ids.
+      placeholder: "Example: dashboard=#status, notifications=#alerts, server=#icarus"
+  - type: textarea
+    id: command_or_action
+    attributes:
+      label: Command or button used
+      description: Include the Discord command or button action. Do not include bot tokens.
+      render: text
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected result
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual result
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs/screenshots
+      description: Add WindowsGSH logs, Discord screenshots, or permission errors. Redact tokens and passwords.
+      render: text

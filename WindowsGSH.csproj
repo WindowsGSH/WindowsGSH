@@ -1,0 +1,42 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <UseWindowsForms>true</UseWindowsForms>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <ApplicationIcon>WindowsGSH.ico</ApplicationIcon>
+    <AssemblyName>WindowsGSH</AssemblyName>
+    <RootNamespace>WindowsGSH</RootNamespace>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <VersionPrefix>0.1.0</VersionPrefix>
+    <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
+    <IncludeAllContentForSelfExtract Condition="'$(PublishSingleFile)' == 'true' and '$(IncludeAllContentForSelfExtract)' == ''">true</IncludeAllContentForSelfExtract>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+    <DebugType>none</DebugType>
+    <DebugSymbols>false</DebugSymbols>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="*.cs" />
+    <Compile Include="Services\**\*.cs" />
+    <Compile Include="Modules\**\*.cs" />
+    <SplashScreen Include="WindowsGSH.Splash.png" />
+    <Resource Include="WindowsGSH.ico" />
+    <PackageReference Include="WPF-UI" Version="4.3.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="WindowsGSH.Core\WindowsGSH.Core.csproj" />
+    <ProjectReference Include="WindowsGSH.Data\WindowsGSH.Data.csproj" />
+    <ProjectReference Include="WindowsGSH.Discord\WindowsGSH.Discord.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Update="LICENSE.md" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+    <None Update="NOTICE.md" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+    <None Update="TRADEMARKS.md" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+    <None Update="SECURITY.md" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+    <None Update="THIRD_PARTY_NOTICES.md" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,86 @@
+name: Bug report
+description: Report something that is broken or behaving unexpectedly.
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: input
+    id: version
+    attributes:
+      label: WindowsGSH version
+      description: Include the release version, commit, or build you are running.
+      placeholder: "Example: v0.1.0"
+    validations:
+      required: true
+  - type: input
+    id: windows_version
+    attributes:
+      label: Windows version
+      placeholder: "Example: Windows 11 23H2"
+    validations:
+      required: true
+  - type: input
+    id: game_module
+    attributes:
+      label: Game/module
+      placeholder: "Example: Icarus"
+    validations:
+      required: true
+  - type: dropdown
+    id: install_path_type
+    attributes:
+      label: Install path type
+      options:
+        - New install
+        - WindowsGSM Copy
+        - WindowsGSM Adopt
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: List the exact actions that trigger the bug.
+      placeholder: |
+        1. Open ...
+        2. Click ...
+        3. See ...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected result
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual result
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs/screenshots
+      description: Add relevant log lines, screenshots, or error text.
+      render: text
+  - type: dropdown
+    id: discord_enabled
+    attributes:
+      label: Was Discord enabled?
+      options:
+        - "No"
+        - "Yes"
+        - "Not sure"
+    validations:
+      required: true
+  - type: dropdown
+    id: windowsgsm_running
+    attributes:
+      label: Was WindowsGSM also running or managing the same server?
+      options:
+        - "No"
+        - "Yes"
+        - "Not sure"
+    validations:
+      required: true
