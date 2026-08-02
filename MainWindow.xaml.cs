@@ -665,7 +665,9 @@ public partial class MainWindow : Wpf.Ui.Controls.FluentWindow
         finally
         {
             IsEnabled = true;
-            Close();
+            // The original Closing event remains active until this async handler returns.
+            // Queue the confirmed close so WPF can finish unwinding that event first.
+            _ = Dispatcher.BeginInvoke(new Action(Close), DispatcherPriority.Normal);
         }
     }
 
