@@ -317,7 +317,7 @@ public partial class MainWindow
         UpdateFirstRunChecklist();
 
         var serversWithTrends = ApplyMetricTrends(state.VisibleServers);
-        InstalledServersItemsControl.ItemsSource = serversWithTrends;
+        _serverCards.Update(serversWithTrends);
 
         if (state.Changed)
         {

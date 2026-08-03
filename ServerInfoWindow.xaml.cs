@@ -35,6 +35,7 @@ public partial class ServerInfoWindow : Wpf.Ui.Controls.FluentWindow
     private readonly ServerTelemetryService _telemetryService = new();
     private readonly IServerConsoleService _consoleService = ServerConsoleService.Shared;
     private readonly DispatcherTimer _timer = new();
+    private readonly StableItemCollection<ServerInfoPlayerRow> _players = new();
     private readonly Queue<ChartSample> _samples = [];
     private readonly int? _maxPlayers;
     private readonly CancellationTokenSource _refreshCancellation = new();
@@ -94,6 +95,7 @@ public partial class ServerInfoWindow : Wpf.Ui.Controls.FluentWindow
         _upnpMappingLifecycleService = upnpMappingLifecycleService ?? throw new ArgumentNullException(nameof(upnpMappingLifecycleService));
         _hasLiveMonitoredProcess = hasLiveMonitoredProcess;
         InitializeComponent();
+        PlayersItemsControl.ItemsSource = _players.Items;
 
         var capabilities = WindowsVisualCapabilities.Current;
         WindowCornerPreference = capabilities.SupportsRoundedCorners
@@ -413,7 +415,7 @@ public partial class ServerInfoWindow : Wpf.Ui.Controls.FluentWindow
             ? Visibility.Visible
             : Visibility.Collapsed;
         PlayerListStateTextBlock.Text = presentation.PlayerListStateText;
-        PlayersItemsControl.ItemsSource = presentation.Players;
+        _players.Update(presentation.Players);
     }
 
     private void DrawChart()

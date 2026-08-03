@@ -50,7 +50,7 @@
                         <ItemsControl x:Name="WarningsItemsControl">
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
-                                    <TextBlock Text="{Binding}" Foreground="{DynamicResource TextBrush}" FontSize="13" Margin="0,2,0,0" />
+                                    <TextBlock Text="{Binding Value}" Foreground="{DynamicResource TextBrush}" FontSize="13" Margin="0,2,0,0" />
                                 </DataTemplate>
                             </ItemsControl.ItemTemplate>
                         </ItemsControl>
@@ -511,7 +511,7 @@
                                             <Style TargetType="Grid">
                                                 <Setter Property="Opacity" Value="0.45" />
                                                 <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding IsRunning}" Value="True">
+                                                    <DataTrigger Binding="{Binding Value.IsRunning}" Value="True">
                                                         <Setter Property="Opacity" Value="1.0" />
                                                     </DataTrigger>
                                                 </Style.Triggers>
@@ -524,11 +524,11 @@
                                             <ColumnDefinition Width="90" />
                                             <ColumnDefinition Width="80" />
                                         </Grid.ColumnDefinitions>
-                                        <TextBlock Grid.Column="0" Text="{Binding Name}" Foreground="{DynamicResource TextBrush}" FontSize="13" TextTrimming="CharacterEllipsis" />
-                                        <TextBlock Grid.Column="1" Text="{Binding Status}" Foreground="{DynamicResource TextBrush}" FontSize="13" />
-                                        <TextBlock Grid.Column="2" Text="{Binding Cpu}" Foreground="{DynamicResource TextBrush}" FontSize="13" />
-                                        <TextBlock Grid.Column="3" Text="{Binding Memory}" Foreground="{DynamicResource TextBrush}" FontSize="13" />
-                                        <TextBlock Grid.Column="4" Text="{Binding Uptime}" Foreground="{DynamicResource TextBrush}" FontSize="13" />
+                                        <TextBlock Grid.Column="0" Text="{Binding Value.Name}" Foreground="{DynamicResource TextBrush}" FontSize="13" TextTrimming="CharacterEllipsis" />
+                                        <TextBlock Grid.Column="1" Text="{Binding Value.Status}" Foreground="{DynamicResource TextBrush}" FontSize="13" />
+                                        <TextBlock Grid.Column="2" Text="{Binding Value.Cpu}" Foreground="{DynamicResource TextBrush}" FontSize="13" />
+                                        <TextBlock Grid.Column="3" Text="{Binding Value.Memory}" Foreground="{DynamicResource TextBrush}" FontSize="13" />
+                                        <TextBlock Grid.Column="4" Text="{Binding Value.Uptime}" Foreground="{DynamicResource TextBrush}" FontSize="13" />
                                     </Grid>
                                 </DataTemplate>
                             </ItemsControl.ItemTemplate>

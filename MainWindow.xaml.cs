@@ -89,6 +89,9 @@ public partial class MainWindow : Wpf.Ui.Controls.FluentWindow
     private readonly ServerOperationManager _operationManager = ServerOperationManager.Shared;
     private readonly ServerStatusComposer _serverStatusComposer = new(TimeSpan.FromMinutes(10));
     private readonly ServerListViewModel _serverListViewModel;
+    private readonly ServerCardCollection _serverCards = new();
+    private readonly StableItemCollection<ServerIssueRow> _serverIssues = new();
+    private readonly StableItemCollection<FirstRunChecklistItem> _firstRunChecklist = new();
     private readonly ServerRuntimeTracker _runtimeTracker;
     private readonly ShutdownPlanner _shutdownPlanner = new();
     private readonly ApplicationExitPlanner _exitPlanner = new();
@@ -147,6 +150,9 @@ public partial class MainWindow : Wpf.Ui.Controls.FluentWindow
             ex => AppLogService.Add("SteamCMD setup failed: " + ex.Message));
         _appLogCollectionChangedHandler = (_, _) => QueueAppLogRefresh();
         MainNavigationItemsControl.ItemsSource = _navigationItems;
+        InstalledServersItemsControl.ItemsSource = _serverCards.Items;
+        ServerIssuesItemsControl.ItemsSource = _serverIssues.Items;
+        FirstRunChecklistItemsControl.ItemsSource = _firstRunChecklist.Items;
         _lifecycleService = new ServerLifecycleService(() => _moduleRegistry.GetModules());
         var steamGuardProvider = new SteamGuardCodeProvider(this);
         var steamClient = new PersistentSteamClient(
@@ -2710,7 +2716,7 @@ public partial class MainWindow : Wpf.Ui.Controls.FluentWindow
         UpdateSummaryPill(WarningSummaryButton, TransitionalSummaryTextBlock, warningCount, "warning");
         UpdateSummaryPill(OnlineSummaryBorder, OnlineSummaryTextBlock, state.OnlineCount, "online");
 
-        ServerIssuesItemsControl.ItemsSource = issueRows;
+        _serverIssues.Update(issueRows);
         if (warningCount == 0)
         {
             ServerIssuesPopup.IsOpen = false;
