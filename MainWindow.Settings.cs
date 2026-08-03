@@ -59,10 +59,10 @@ public partial class MainWindow
             return;
         }
 
-        FirstRunChecklistItemsControl.ItemsSource = _firstRunChecklistComposer.Compose(
+        _firstRunChecklist.Update(_firstRunChecklistComposer.Compose(
             _latestReadinessResults,
             _settings.DiscordBotEnabled,
-            _discordTokenStore.HasToken);
+            _discordTokenStore.HasToken));
     }
 
     private void ApplyLightTheme()

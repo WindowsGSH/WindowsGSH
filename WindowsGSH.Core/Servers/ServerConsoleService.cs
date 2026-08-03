@@ -412,11 +412,16 @@ public sealed class ServerConsoleService : IServerConsoleService
             // child has stopped reading from the pipe (hung, deadlocked, or simply never consuming
             // input) - and this method is called synchronously by callers that don't expect it to
             // block at all (ExecuteModuleCommandAsync's Redirected-strategy branch below calls it
-            // with no await beforehand, and it's reachable directly from a UI thread). Running the
-            // write on a background thread with a bounded wait keeps the common (fast) case exactly
-            // as before while turning "freezes forever" into "fails after a few seconds" for the
-            // pathological case, for every caller of this method, not just the UI one.
-            var writeTask = Task.Run(() => _writer.Write(process, command));
+            // with no await beforehand, and it's reachable directly from a UI thread). Use a
+            // dedicated LongRunning worker rather than the shared thread pool: SendCommand waits
+            // synchronously below, so a saturated pool could otherwise delay a healthy write until
+            // after the timeout and incorrectly disable that server's console input. The bounded
+            // wait still turns a genuinely blocked pipe into a clear failure after a few seconds.
+            var writeTask = Task.Factory.StartNew(
+                () => _writer.Write(process, command),
+                CancellationToken.None,
+                TaskCreationOptions.LongRunning | TaskCreationOptions.DenyChildAttach,
+                TaskScheduler.Default);
 
             if (!writeTask.Wait(_sendCommandTimeout))
             {

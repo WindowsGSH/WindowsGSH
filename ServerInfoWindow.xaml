@@ -209,10 +209,10 @@
                                                                 <ColumnDefinition Width="80" />
                                                                 <ColumnDefinition Width="90" />
                                                             </Grid.ColumnDefinitions>
-                                                            <TextBlock Text="{Binding Name}" TextTrimming="CharacterEllipsis" />
-                                                            <TextBlock Grid.Column="1" Text="{Binding ScoreText}" />
-                                                            <TextBlock Grid.Column="2" Text="{Binding PingText}" />
-                                                            <TextBlock Grid.Column="3" Text="{Binding DurationText}" />
+                                                            <TextBlock Text="{Binding Value.Name}" TextTrimming="CharacterEllipsis" />
+                                                            <TextBlock Grid.Column="1" Text="{Binding Value.ScoreText}" />
+                                                            <TextBlock Grid.Column="2" Text="{Binding Value.PingText}" />
+                                                            <TextBlock Grid.Column="3" Text="{Binding Value.DurationText}" />
                                                         </Grid>
                                                     </DataTemplate>
                                                 </ItemsControl.ItemTemplate>

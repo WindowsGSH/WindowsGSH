@@ -24,6 +24,8 @@ public partial class HostHealthView : System.Windows.Controls.UserControl
     private const int ChartWidth = 900;
     private const int ChartHeight = 80;
     private const int ChartDisplaySamples = 900;
+    private readonly StableItemCollection<string> _warnings = new();
+    private readonly StableItemCollection<ServerResourceRow> _serverResources = new();
 
     private SystemMetricsSnapshot? _lastSnapshot;
     private IReadOnlyList<InstalledServer> _lastServers = [];
@@ -34,6 +36,8 @@ public partial class HostHealthView : System.Windows.Controls.UserControl
     public HostHealthView()
     {
         InitializeComponent();
+        WarningsItemsControl.ItemsSource = _warnings.Items;
+        ServerResourcesItemsControl.ItemsSource = _serverResources.Items;
         LoadStaticInfo();
     }
 
@@ -86,7 +90,7 @@ public partial class HostHealthView : System.Windows.Controls.UserControl
     {
         if (servers.Count == 0)
         {
-            ServerResourcesItemsControl.ItemsSource = null;
+            _serverResources.Update([]);
             NoServersTextBlock.Visibility = Visibility.Visible;
             return;
         }
@@ -104,7 +108,7 @@ public partial class HostHealthView : System.Windows.Controls.UserControl
             .ThenByDescending(r => r.MemorySortBytes)
             .ToList();
 
-        ServerResourcesItemsControl.ItemsSource = rows;
+        _serverResources.Update(rows);
         NoServersTextBlock.Visibility = Visibility.Collapsed;
     }
 
@@ -155,7 +159,7 @@ public partial class HostHealthView : System.Windows.Controls.UserControl
             warnings.Add("⚠ System has a pending reboot");
         }
 
-        WarningsItemsControl.ItemsSource = warnings;
+        _warnings.Update(warnings);
         WarningsBorder.Visibility = warnings.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
     }
 

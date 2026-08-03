@@ -179,10 +179,10 @@
                                             Padding="10"
                                             Margin="0,0,0,8">
                                         <StackPanel>
-                                            <TextBlock Text="{Binding Name}" Foreground="{DynamicResource WarnMetricText}" FontWeight="SemiBold" />
-                                            <TextBlock Text="{Binding Issue}" Foreground="{DynamicResource WarnMetricText}" TextWrapping="Wrap" Margin="0,4,0,0" />
+                                            <TextBlock Text="{Binding Value.Name}" Foreground="{DynamicResource WarnMetricText}" FontWeight="SemiBold" />
+                                            <TextBlock Text="{Binding Value.Issue}" Foreground="{DynamicResource WarnMetricText}" TextWrapping="Wrap" Margin="0,4,0,0" />
                                             <Button Content="Ignore Build"
-                                                    Tag="{Binding Server}"
+                                                    Tag="{Binding Value.Server}"
                                                     Margin="0,8,0,0"
                                                     HorizontalAlignment="Left"
                                                     MinWidth="96"
@@ -191,7 +191,7 @@
                                                     <Style TargetType="Button" BasedOn="{StaticResource DialogSecondaryButton}">
                                                         <Setter Property="Visibility" Value="Collapsed" />
                                                         <Style.Triggers>
-                                                            <DataTrigger Binding="{Binding CanIgnoreBuild}" Value="True">
+                                                            <DataTrigger Binding="{Binding Value.CanIgnoreBuild}" Value="True">
                                                                 <Setter Property="Visibility" Value="Visible" />
                                                             </DataTrigger>
                                                         </Style.Triggers>
@@ -393,9 +393,9 @@
                                                 <ColumnDefinition Width="120" />
                                                 <ColumnDefinition Width="*" />
                                             </Grid.ColumnDefinitions>
-                                            <TextBlock Text="{Binding Label}" Foreground="{DynamicResource TextBrush}" FontWeight="SemiBold" />
-                                            <TextBlock Grid.Column="1" Text="{Binding StatusText}" Foreground="{DynamicResource WarnMetricText}" FontWeight="SemiBold" />
-                                            <TextBlock Grid.Column="2" Text="{Binding Detail}" Foreground="{DynamicResource MutedTextBrush}" TextWrapping="Wrap" />
+                                            <TextBlock Text="{Binding Value.Label}" Foreground="{DynamicResource TextBrush}" FontWeight="SemiBold" />
+                                            <TextBlock Grid.Column="1" Text="{Binding Value.StatusText}" Foreground="{DynamicResource WarnMetricText}" FontWeight="SemiBold" />
+                                            <TextBlock Grid.Column="2" Text="{Binding Value.Detail}" Foreground="{DynamicResource MutedTextBrush}" TextWrapping="Wrap" />
                                         </Grid>
                                     </DataTemplate>
                                 </ItemsControl.ItemTemplate>
@@ -552,7 +552,7 @@
                                             </Border>
                                         </Grid>
                                         <StackPanel Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Top" Orientation="Horizontal">
-                                            <Button Content="Start" Tag="{Binding}" Click="StartServerButton_Click" ToolTip="Start server">
+                                            <Button Content="Start" Tag="{Binding Server}" Click="StartServerButton_Click" ToolTip="Start server">
                                                 <Button.Style>
                                                     <Style TargetType="Button" BasedOn="{StaticResource CardActionButton}">
                                                         <Setter Property="Visibility" Value="Collapsed" />
@@ -564,7 +564,7 @@
                                                     </Style>
                                                 </Button.Style>
                                             </Button>
-                                            <Button Content="Update" Tag="{Binding}" Margin="8,0,0,0" Click="UpdateServerButton_Click" ToolTip="Update server">
+                                            <Button Content="Update" Tag="{Binding Server}" Margin="8,0,0,0" Click="UpdateServerButton_Click" ToolTip="Update server">
                                                 <Button.Style>
                                                     <Style TargetType="Button" BasedOn="{StaticResource CardActionButton}">
                                                         <Setter Property="Visibility" Value="Collapsed" />
@@ -576,7 +576,7 @@
                                                     </Style>
                                                 </Button.Style>
                                             </Button>
-                                            <Button Content="Verify Files" Tag="{Binding}" Margin="8,0,0,0" Click="VerifyServerButton_Click" ToolTip="Verify and repair server files">
+                                            <Button Content="Verify Files" Tag="{Binding Server}" Margin="8,0,0,0" Click="VerifyServerButton_Click" ToolTip="Verify and repair server files">
                                                 <Button.Style>
                                                     <Style TargetType="Button" BasedOn="{StaticResource CardActionButton}">
                                                         <Setter Property="Visibility" Value="Collapsed" />
@@ -599,7 +599,7 @@
                                                     </Style>
                                                 </Button.Style>
                                             </Button>
-                                            <Button Content="Ignore" Tag="{Binding}" Margin="8,0,0,0" Click="IgnoreServerBuildButton_Click" ToolTip="Ignore this available Steam build">
+                                            <Button Content="Ignore" Tag="{Binding Server}" Margin="8,0,0,0" Click="IgnoreServerBuildButton_Click" ToolTip="Ignore this available Steam build">
                                                 <Button.Style>
                                                     <Style TargetType="Button" BasedOn="{StaticResource CardActionButton}">
                                                         <Setter Property="Visibility" Value="Collapsed" />
@@ -611,7 +611,7 @@
                                                     </Style>
                                                 </Button.Style>
                                             </Button>
-                                            <Button Content="Stop" Tag="{Binding}" Margin="8,0,0,0" Click="StopServerButton_Click" ToolTip="Stop server">
+                                            <Button Content="Stop" Tag="{Binding Server}" Margin="8,0,0,0" Click="StopServerButton_Click" ToolTip="Stop server">
                                                 <Button.Style>
                                                     <Style TargetType="Button" BasedOn="{StaticResource CardActionButton}">
                                                         <Setter Property="Visibility" Value="Collapsed" />
@@ -626,7 +626,7 @@
                                                     </Style>
                                                 </Button.Style>
                                             </Button>
-                                            <Button Content="Restart" Tag="{Binding}" Margin="8,0,0,0" Click="RestartServerButton_Click" ToolTip="Restart server">
+                                            <Button Content="Restart" Tag="{Binding Server}" Margin="8,0,0,0" Click="RestartServerButton_Click" ToolTip="Restart server">
                                                 <Button.Style>
                                                     <Style TargetType="Button" BasedOn="{StaticResource CardActionButton}">
                                                         <Setter Property="Visibility" Value="Collapsed" />
@@ -638,7 +638,7 @@
                                                     </Style>
                                                 </Button.Style>
                                             </Button>
-                                            <Button Content="Info" Tag="{Binding}" Margin="8,0,0,0" Click="InfoButton_Click" ToolTip="Server info">
+                                            <Button Content="Info" Tag="{Binding Server}" Margin="8,0,0,0" Click="InfoButton_Click" ToolTip="Server info">
                                                 <Button.Style>
                                                     <Style TargetType="Button" BasedOn="{StaticResource CardActionButton}">
                                                         <Setter Property="Visibility" Value="Collapsed" />
@@ -650,7 +650,7 @@
                                                     </Style>
                                                 </Button.Style>
                                             </Button>
-                                            <Button Content="Cfg" Tag="{Binding}" Margin="8,0,0,0" Click="OpenConfigButton_Click" ToolTip="Edit server config">
+                                            <Button Content="Cfg" Tag="{Binding Server}" Margin="8,0,0,0" Click="OpenConfigButton_Click" ToolTip="Edit server config">
                                                 <Button.Style>
                                                     <Style TargetType="Button" BasedOn="{StaticResource CardActionButton}">
                                                         <Setter Property="Visibility" Value="Collapsed" />
@@ -666,7 +666,7 @@
                                                     </Style>
                                                 </Button.Style>
                                             </Button>
-                                            <Button Content="Delete" Tag="{Binding}" Margin="8,0,0,0" Click="DeleteServerButton_Click" ToolTip="Remove server">
+                                            <Button Content="Delete" Tag="{Binding Server}" Margin="8,0,0,0" Click="DeleteServerButton_Click" ToolTip="Remove server">
                                                 <Button.Style>
                                                     <Style TargetType="Button" BasedOn="{StaticResource CardActionButton}">
                                                         <Setter Property="IsEnabled" Value="True" />
