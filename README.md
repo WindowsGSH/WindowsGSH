@@ -5,6 +5,7 @@
 ![platform](https://img.shields.io/badge/platform-Windows-blue)
 ![.NET](https://img.shields.io/badge/.NET-10.0-purple)
 ![licence](https://img.shields.io/badge/licence-source_available-64748B)
+[![Join Discord](https://img.shields.io/badge/Discord-Join_the_community-5865F2?logo=discord&logoColor=white)](https://discord.gg/w7RZwSeAWh)
 
 WindowsGSH is a Windows desktop application for installing, configuring,
 running, and monitoring dedicated game servers from one place.
@@ -37,6 +38,7 @@ WindowsGSH requires Windows 10 or later. Official releases are self-contained.
 - [Download the latest release](https://github.com/WindowsGSH/WindowsGSH/releases)
 - [Getting Started](https://github.com/WindowsGSH/WindowsGSH/wiki/Getting-Started)
 - [Browse the WindowsGSH Wiki](https://github.com/WindowsGSH/WindowsGSH/wiki)
+- [Join the WindowsGSH community on Discord](https://discord.gg/w7RZwSeAWh)
 - [Report a bug or request a feature](https://github.com/WindowsGSH/WindowsGSH/issues)
 
 ## Documentation
