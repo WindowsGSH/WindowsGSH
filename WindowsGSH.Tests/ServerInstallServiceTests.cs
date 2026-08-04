@@ -43,6 +43,40 @@ public sealed class ServerInstallServiceTests
     }
 
     [Fact]
+    public async Task InstallAsync_PersistsSelectedUpnpPolicy()
+    {
+        var service = new ServerInstallService(new FakeSteamCmdClient());
+        var instance = CreateInstance();
+        var module = new UpdateModule(new ModuleUpdateResult(true, "Downloaded.", "123"));
+
+        var result = await service.InstallAsync(new ServerInstallRequest(
+            module,
+            instance,
+            UpnpMappingPolicy: UpnpMappingPolicy.MapOnStartRemoveOnStop));
+
+        Assert.True(result.Success);
+        using var document = JsonDocument.Parse(File.ReadAllText(instance.ConfigPath));
+        Assert.Equal(
+            nameof(UpnpMappingPolicy.MapOnStartRemoveOnStop),
+            document.RootElement.GetProperty("network").GetProperty("upnpMappingPolicy").GetString());
+    }
+
+    [Fact]
+    public async Task InstallAsync_ForwardsProgressToModuleUpdater()
+    {
+        var service = new ServerInstallService(new FakeSteamCmdClient());
+        var instance = CreateInstance();
+        var module = new ProgressUpdateModule();
+        var messages = new List<string>();
+        var progress = new Progress<string>(messages.Add);
+
+        var result = await service.InstallAsync(new ServerInstallRequest(module, instance, Progress: progress));
+
+        Assert.True(result.Success);
+        Assert.Same(progress, module.ObservedProgress);
+    }
+
+    [Fact]
     public async Task UpdateAsync_UsesSteamPlanValues_AndWritesMetadata()
     {
         var now = new DateTimeOffset(2026, 5, 24, 13, 0, 0, TimeSpan.Zero);
@@ -284,6 +318,24 @@ public sealed class ServerInstallServiceTests
         public Task<ModuleUpdateResult> UpdateAsync(ServerInstance instance, CancellationToken cancellationToken)
         {
             return Task.FromResult(_result);
+        }
+    }
+
+    private sealed class ProgressUpdateModule : UnsupportedModule, IModuleUpdateCapability
+    {
+        public IProgress<string>? ObservedProgress { get; private set; }
+
+        public Task<ModuleUpdateResult> UpdateAsync(ServerInstance instance, CancellationToken cancellationToken) =>
+            Task.FromResult(new ModuleUpdateResult(true, "Updated."));
+
+        public Task<ModuleUpdateResult> UpdateAsync(
+            ServerInstance instance,
+            IProgress<string>? progress,
+            CancellationToken cancellationToken)
+        {
+            ObservedProgress = progress;
+            progress?.Report("Module progress.");
+            return Task.FromResult(new ModuleUpdateResult(true, "Updated."));
         }
     }
 }

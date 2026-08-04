@@ -61,6 +61,7 @@
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="150" />
@@ -97,9 +98,33 @@
                           Margin="0,10,0,0"
                           VerticalAlignment="Center"
                           Style="{StaticResource AppCheckBox}" />
+                <Grid x:Name="UpnpInstallPanel"
+                      Grid.Row="2"
+                      Grid.Column="0"
+                      Grid.ColumnSpan="4"
+                      Margin="0,10,0,0"
+                      Visibility="Collapsed">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="150" />
+                        <ColumnDefinition Width="300" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Text="UPnP Port Mapping" VerticalAlignment="Center" FontWeight="SemiBold" />
+                    <ComboBox x:Name="UpnpMappingPolicyComboBox"
+                              Grid.Column="1"
+                              MinHeight="36"
+                              DisplayMemberPath="DisplayText"
+                              SelectedValuePath="Value" />
+                    <TextBlock Grid.Column="2"
+                               Margin="12,0,0,0"
+                               VerticalAlignment="Center"
+                               TextWrapping="Wrap"
+                               Foreground="{DynamicResource MutedTextBrush}"
+                               Text="Optional. Requires UPnP on the router and only maps ports the selected module marks as externally accessible." />
+                </Grid>
             </Grid>
 
-            <ScrollViewer Grid.Row="2" Margin="0,16,0,0" VerticalScrollBarVisibility="Auto">
+            <ScrollViewer Grid.Row="2" Margin="0,16,0,0" Padding="0,0,12,0" VerticalScrollBarVisibility="Auto">
                 <StackPanel x:Name="FieldsPanel" />
             </ScrollViewer>
 

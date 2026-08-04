@@ -41,6 +41,7 @@ public partial class InstallServerWindow : Wpf.Ui.Controls.FluentWindow
     private int _branchLoadVersion;
     private string? _renderedModuleId;
     private string? _loggedInstallModeModuleId;
+    private string? _upnpModuleId;
     private bool _modulesLoaded;
 
     private IGameServerModule? SelectedModule => ModuleComboBox.SelectedItem as IGameServerModule;
@@ -71,6 +72,13 @@ public partial class InstallServerWindow : Wpf.Ui.Controls.FluentWindow
         RefreshBranchesButton.IsEnabled = false;
         StatusTextBlock.Text = "Loading modules...";
         AppendLog("Loading modules...");
+        UpnpMappingPolicyComboBox.ItemsSource = new[]
+        {
+            new UpnpPolicyChoice(nameof(UpnpMappingPolicy.Manual), "Manual (show instructions only)"),
+            new UpnpPolicyChoice(nameof(UpnpMappingPolicy.MapOnStart), "Automatic - map on start"),
+            new UpnpPolicyChoice(nameof(UpnpMappingPolicy.MapOnStartRemoveOnStop), "Automatic - map on start, remove on stop")
+        };
+        UpnpMappingPolicyComboBox.SelectedValue = nameof(UpnpMappingPolicy.Manual);
         ResetBranchComboBox();
         Loaded += InstallServerWindow_Loaded;
     }
@@ -223,6 +231,7 @@ public partial class InstallServerWindow : Wpf.Ui.Controls.FluentWindow
         SteamBranchComboBox.IsEnabled = usesSteam;
         RefreshBranchesButton.IsEnabled = _modulesLoaded && usesSteam;
         InstallDescriptionTextBlock.Text = GetInstallDescription(selectedModule);
+        UpdateUpnpInstallControls(selectedModule);
 
         if (!_modulesLoaded)
         {
@@ -241,6 +250,38 @@ public partial class InstallServerWindow : Wpf.Ui.Controls.FluentWindow
         {
             StatusTextBlock.Text = string.Empty;
         }
+    }
+
+    private void UpdateUpnpInstallControls(IGameServerModule? module)
+    {
+        var hasExternallyEligiblePort = false;
+        try
+        {
+            hasExternallyEligiblePort = module?.GetPorts().Any(port => port.OpenExternally) == true;
+        }
+        catch (Exception ex) when (
+            ex is InvalidOperationException or
+            NotSupportedException or
+            JsonException or
+            IOException)
+        {
+            AppendLog($"UPnP install option unavailable for {module?.Name ?? "selected module"}: port declarations could not be read ({ex.GetType().Name}).");
+        }
+
+        UpnpInstallPanel.Visibility = hasExternallyEligiblePort ? Visibility.Visible : Visibility.Collapsed;
+        if (!string.Equals(_upnpModuleId, module?.Id, StringComparison.OrdinalIgnoreCase))
+        {
+            _upnpModuleId = module?.Id;
+            UpnpMappingPolicyComboBox.SelectedValue = nameof(UpnpMappingPolicy.Manual);
+        }
+    }
+
+    private UpnpMappingPolicy GetSelectedUpnpPolicy()
+    {
+        return UpnpInstallPanel.Visibility == Visibility.Visible &&
+               Enum.TryParse<UpnpMappingPolicy>(UpnpMappingPolicyComboBox.SelectedValue?.ToString(), true, out var policy)
+            ? policy
+            : UpnpMappingPolicy.Manual;
     }
 
     private static bool CanInstall(IGameServerModule? module)
@@ -447,7 +488,8 @@ public partial class InstallServerWindow : Wpf.Ui.Controls.FluentWindow
                         instance,
                         branch,
                         branchPassword,
-                        Progress: CreateProgress(_ => lastSteamOutputUtc = DateTimeOffset.UtcNow)));
+                        Progress: CreateProgress(_ => lastSteamOutputUtc = DateTimeOffset.UtcNow),
+                        UpnpMappingPolicy: GetSelectedUpnpPolicy()));
                 if (!result.Success)
                 {
                     throw new InvalidOperationException(result.LastError ?? result.Message);
@@ -476,7 +518,8 @@ public partial class InstallServerWindow : Wpf.Ui.Controls.FluentWindow
                         instance,
                         string.Empty,
                         string.Empty,
-                        Progress: CreateProgress()));
+                        Progress: CreateProgress(),
+                        UpnpMappingPolicy: GetSelectedUpnpPolicy()));
             }
             catch (Exception ex)
             {
@@ -733,10 +776,7 @@ public partial class InstallServerWindow : Wpf.Ui.Controls.FluentWindow
         return ModuleFieldFormService.IsFieldVisible(field, GetFieldValue);
     }
 
-    private static string GetFieldLabel(ConfigFieldDefinition field)
-    {
-        return field.RestartRequired ? $"{field.Label} (restart)" : field.Label;
-    }
+    private static string GetFieldLabel(ConfigFieldDefinition field) => ConfigFieldRowBuilder.GetFieldLabel(field);
 
     // P3-06: SteamCmdPolicy.BuildInstallArguments splices this verbatim into the SteamCMD command
     // line for both the initial install and every subsequent update - shown here so it's reviewed
@@ -773,39 +813,7 @@ public partial class InstallServerWindow : Wpf.Ui.Controls.FluentWindow
     }
 
     private void AddRow(string label, FrameworkElement control, string? description)
-    {
-        var grid = new Grid { Margin = new Thickness(0, 0, 0, 12) };
-        grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(170) });
-        grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
-
-        var labelBlock = new TextBlock
-        {
-            Text = label,
-            VerticalAlignment = VerticalAlignment.Center,
-            FontWeight = FontWeights.SemiBold,
-            Foreground = (System.Windows.Media.Brush)FindResource("TextBrush")
-        };
-        Grid.SetColumn(labelBlock, 0);
-        grid.Children.Add(labelBlock);
-
-        var stack = new StackPanel();
-        stack.Children.Add(control);
-        if (!string.IsNullOrWhiteSpace(description))
-        {
-            stack.Children.Add(new TextBlock
-            {
-                Text = description,
-                Foreground = (System.Windows.Media.Brush)FindResource("MutedTextBrush"),
-                FontSize = 11,
-                Margin = new Thickness(0, 3, 0, 0),
-                TextWrapping = TextWrapping.Wrap
-            });
-        }
-
-        Grid.SetColumn(stack, 1);
-        grid.Children.Add(stack);
-        FieldsPanel.Children.Add(grid);
-    }
+        => ConfigFieldRowBuilder.AddRow(FieldsPanel, label, control, description);
 
     private void ValidatePortAvailability(IGameServerModule module, ServerInstance candidate)
     {
@@ -1069,3 +1077,5 @@ public partial class InstallServerWindow : Wpf.Ui.Controls.FluentWindow
     }
 
 }
+
+internal sealed record UpnpPolicyChoice(string Value, string DisplayText);
