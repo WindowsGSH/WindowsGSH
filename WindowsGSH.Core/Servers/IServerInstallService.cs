@@ -27,7 +27,8 @@ public sealed record ServerInstallRequest(
     bool WriteServerConfig = true,
     bool WriteModuleConfig = true,
     bool UseOperationCoordinator = true,
-    IProgress<string>? Progress = null);
+    IProgress<string>? Progress = null,
+    UpnpMappingPolicy UpnpMappingPolicy = UpnpMappingPolicy.Manual);
 
 public sealed record ServerUpdateRequest(
     IGameServerModule Module,

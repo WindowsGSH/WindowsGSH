@@ -2147,10 +2147,7 @@ public partial class ServerConfigEditorWindow : Wpf.Ui.Controls.FluentWindow
                     : GetSettingValue(key, null));
     }
 
-    private static string GetFieldLabel(ConfigFieldDefinition field)
-    {
-        return field.RestartRequired ? $"{field.Label} (restart)" : field.Label;
-    }
+    private static string GetFieldLabel(ConfigFieldDefinition field) => ConfigFieldRowBuilder.GetFieldLabel(field);
 
     private void AddLaunchArgumentPreviewFields(StackPanel panel)
     {
@@ -2328,37 +2325,8 @@ public partial class ServerConfigEditorWindow : Wpf.Ui.Controls.FluentWindow
         control.SetResourceReference(System.Windows.Controls.Control.BorderBrushProperty, "BorderBrushSoft");
     }
 
-    private void AddRow(StackPanel panel, string label, FrameworkElement control, string? description)
-    {
-        var grid = new Grid { Margin = new Thickness(0, 0, 0, 12) };
-        grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(210) });
-        grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
-
-        var labelBlock = new TextBlock
-        {
-            Text = label,
-            VerticalAlignment = VerticalAlignment.Center,
-            FontWeight = FontWeights.SemiBold,
-            TextWrapping = TextWrapping.Wrap,
-            Margin = new Thickness(0, 0, 12, 0)
-        };
-        labelBlock.SetResourceReference(ForegroundProperty, "TextBrush");
-        Grid.SetColumn(labelBlock, 0);
-        grid.Children.Add(labelBlock);
-
-        var stack = new StackPanel();
-        stack.Children.Add(control);
-        if (!string.IsNullOrWhiteSpace(description))
-        {
-            var descriptionBlock = new TextBlock { Text = description, FontSize = 11, Margin = new Thickness(0, 3, 0, 0), TextWrapping = TextWrapping.Wrap };
-            descriptionBlock.SetResourceReference(ForegroundProperty, "MutedTextBrush");
-            stack.Children.Add(descriptionBlock);
-        }
-
-        Grid.SetColumn(stack, 1);
-        grid.Children.Add(stack);
-        panel.Children.Add(grid);
-    }
+    private static void AddRow(StackPanel panel, string label, FrameworkElement control, string? description)
+        => ConfigFieldRowBuilder.AddRow(panel, label, control, description);
 
     private void ApplyReadOnlyState()
     {

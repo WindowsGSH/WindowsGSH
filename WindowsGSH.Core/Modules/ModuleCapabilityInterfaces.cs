@@ -46,6 +46,11 @@ public interface IModuleUpdateCapability
     Task<ModuleUpdateResult> UpdateAsync(
         ServerInstance instance,
         CancellationToken cancellationToken);
+
+    Task<ModuleUpdateResult> UpdateAsync(
+        ServerInstance instance,
+        IProgress<string>? progress,
+        CancellationToken cancellationToken) => UpdateAsync(instance, cancellationToken);
 }
 
 public interface IModuleConsoleCommandCapability

@@ -95,7 +95,7 @@ public sealed class ServerInstallService : IServerInstallService
 
                     if (request.WriteServerConfig)
                     {
-                        WriteServerConfig(request.Module, request.Instance, branch, request.SteamBranchPassword);
+                        WriteServerConfig(request.Module, request.Instance, branch, request.SteamBranchPassword, request.UpnpMappingPolicy);
                         request.Progress?.Report("Wrote " + request.Instance.ConfigPath);
                     }
 
@@ -119,7 +119,7 @@ public sealed class ServerInstallService : IServerInstallService
 
                 if (request.WriteServerConfig)
                 {
-                    WriteServerConfig(request.Module, request.Instance, string.Empty, string.Empty);
+                    WriteServerConfig(request.Module, request.Instance, string.Empty, string.Empty, request.UpnpMappingPolicy);
                     request.Progress?.Report("Wrote " + request.Instance.ConfigPath);
                     request.Progress?.Report("Wrote initial server config before module update.");
                 }
@@ -131,7 +131,7 @@ public sealed class ServerInstallService : IServerInstallService
 
                 request.Progress?.Report($"Preparing {request.Module.Name} module update...");
                 request.Progress?.Report("Resolving build and downloading server files through the module updater...");
-                var result = await moduleUpdater.UpdateAsync(request.Instance, token).ConfigureAwait(false);
+                var result = await moduleUpdater.UpdateAsync(request.Instance, request.Progress, token).ConfigureAwait(false);
                 ModuleUpdateStateWriter.Write(request.Instance.ConfigPath, result, _utcNow());
                 ReportModuleUpdate(result, request.Progress);
 
@@ -160,7 +160,7 @@ public sealed class ServerInstallService : IServerInstallService
                 request.Progress?.Report($"Updating {request.Instance.Name} {request.Reason}.");
                 if (request.Module is IModuleUpdateCapability moduleUpdater)
                 {
-                    var result = await moduleUpdater.UpdateAsync(request.Instance, token).ConfigureAwait(false);
+                    var result = await moduleUpdater.UpdateAsync(request.Instance, request.Progress, token).ConfigureAwait(false);
                     request.Progress?.Report(result.Message);
                     ModuleUpdateStateWriter.Write(request.Instance.ConfigPath, result, _utcNow());
                     return new ServerInstallResult(
@@ -233,7 +233,7 @@ public sealed class ServerInstallService : IServerInstallService
             }).ConfigureAwait(false);
     }
 
-    public static void WriteServerConfig(IGameServerModule module, ServerInstance instance, string branch, string branchPassword)
+    public static void WriteServerConfig(IGameServerModule module, ServerInstance instance, string branch, string branchPassword, UpnpMappingPolicy upnpMappingPolicy = UpnpMappingPolicy.Manual)
     {
         var steamInstall = module.GetSteamInstall();
         var branchPasswordReference = string.Empty;
@@ -258,6 +258,10 @@ public sealed class ServerInstallService : IServerInstallService
                     branch = string.Equals(branch, "public", StringComparison.OrdinalIgnoreCase) ? string.Empty : branch,
                     branchPasswordRef = branchPasswordReference
                 },
+            network = new
+            {
+                upnpMappingPolicy = upnpMappingPolicy.ToString()
+            },
             settings = instance.Settings
         })?.AsObject() ?? [];
 
